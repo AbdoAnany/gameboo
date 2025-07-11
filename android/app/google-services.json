@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "77702366173",
+    "project_id": "hr360-f8636",
+    "storage_bucket": "hr360-f8636.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77702366173:android:75cef39beb330cd0f8ec34",
+        "android_client_info": {
+          "package_name": "com.abdoanany.gameboo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "77702366173-1bd3l5g311vmvbl7p7earf186jg4dvfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0A62PWVxVJIn8fMhEB1Q-XF0-tBlLi5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "77702366173-1bd3l5g311vmvbl7p7earf186jg4dvfm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "77702366173-73qae925avd0hpi1us5g1v7il1p9v3ae.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.hr360"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:77702366173:android:8115c90ca69d5beaf8ec34",
+        "android_client_info": {
+          "package_name": "com.example.hr360"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "77702366173-1bd3l5g311vmvbl7p7earf186jg4dvfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0A62PWVxVJIn8fMhEB1Q-XF0-tBlLi5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "77702366173-1bd3l5g311vmvbl7p7earf186jg4dvfm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "77702366173-73qae925avd0hpi1us5g1v7il1p9v3ae.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.hr360"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
