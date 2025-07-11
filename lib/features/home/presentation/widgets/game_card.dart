@@ -143,16 +143,24 @@ class GameCard extends StatelessWidget {
 
   IconData _getGameIcon(GameType type) {
     switch (type) {
-      case GameType.cardShooter:
-        return Icons.style_outlined;
-      case GameType.ballBlaster:
-        return Icons.sports_baseball_outlined;
-      case GameType.racingRush:
+      case GameType.rockPaperScissors:
+        return Icons.back_hand_outlined;
+      case GameType.ticTacToe:
+        return Icons.tag_outlined;
+      case GameType.memoryCards:
+        return Icons.psychology_outlined;
+      case GameType.shootingGame:
+        return Icons.gps_fixed_outlined;
+      case GameType.carRacing:
         return Icons.directions_car_outlined;
-      case GameType.puzzleMania:
-        return Icons.extension_outlined;
       case GameType.droneFlight:
         return Icons.flight_outlined;
+      case GameType.mcqQuiz:
+        return Icons.quiz_outlined;
+      case GameType.ballBlaster:
+        return Icons.sports_baseball_outlined;
+      case GameType.towerBuilding:
+        return Icons.apartment_outlined;
     }
   }
 }

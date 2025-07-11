@@ -70,6 +70,17 @@ class GameCubit extends Cubit<GameState> {
     }
   }
 
+  // Public method to reload games
+  void reloadGames() {
+    _loadGames();
+  }
+
+  // Method to return to games list after completing a game
+  void returnToGamesList() {
+    final games = GameRepository.getAllGames();
+    emit(GameLoaded(games, _sessions));
+  }
+
   void startGame(GameType gameType, GameDifficulty difficulty) {
     final session = GameSession(
       id: DateTime.now().millisecondsSinceEpoch.toString(),

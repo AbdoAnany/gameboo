@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/user_profile.dart';
+import '../../domain/entities/game_activity.dart';
 import '../../../characters/domain/entities/character.dart';
+import '../../data/profile_repository.dart';
 
 // Profile States
 abstract class ProfileState extends Equatable {
@@ -35,75 +37,72 @@ class ProfileError extends ProfileState {
 
 // Profile Cubit
 class ProfileCubit extends Cubit<ProfileState> {
+  final ProfileRepository _profileRepository = ProfileRepository();
+
   ProfileCubit() : super(ProfileInitial()) {
     _loadProfile();
   }
 
-  void _loadProfile() {
+  Future<void> _loadProfile() async {
     emit(ProfileLoading());
 
-    // For now, create a default profile
-    // In a real app, this would load from Firebase/local storage
-    final profile = UserProfile(
-      id: 'default_user',
-      username: 'GameBoo Player',
-      email: 'player@gameboo.com',
-      xp: 0,
-      level: 1,
-      selectedCharacter: CharacterType.nova,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      coins: 1000, // Starting coins
-      gems: 50, // Starting gems
-      ownedShopItems: [], // No items owned initially
-    );
-
-    emit(ProfileLoaded(profile));
-  }
-
-  void updateProfile(UserProfile profile) {
-    emit(ProfileLoaded(profile));
-  }
-
-  void addXP(int xp) {
-    if (state is ProfileLoaded) {
-      final currentProfile = (state as ProfileLoaded).profile;
-      int totalXP = currentProfile.xp + xp;
-      int newLevel = _calculateLevelFromXP(totalXP);
-      // Clamp XP to max for new level if needed
-      final updatedProfile = currentProfile.copyWith(
-        xp: totalXP,
-        level: newLevel,
-        updatedAt: DateTime.now(),
-      );
-      emit(ProfileLoaded(updatedProfile));
+    try {
+      final profile = await _profileRepository.getData();
+      emit(ProfileLoaded(profile));
+    } catch (e) {
+      emit(ProfileError('Failed to load profile: $e'));
     }
   }
 
-  void selectCharacter(CharacterType character) {
-    if (state is ProfileLoaded) {
-      final currentProfile = (state as ProfileLoaded).profile;
-      final updatedProfile = currentProfile.copyWith(
-        selectedCharacter: character,
-        updatedAt: DateTime.now(),
-      );
-
+  Future<void> updateProfile(UserProfile profile) async {
+    try {
+      final updatedProfile = await _profileRepository.updateData(profile);
       emit(ProfileLoaded(updatedProfile));
+    } catch (e) {
+      emit(ProfileError('Failed to update profile: $e'));
     }
   }
 
-  void incrementGameWin(String gameType) {
+  Future<void> addXP(int xp) async {
     if (state is ProfileLoaded) {
-      final currentProfile = (state as ProfileLoaded).profile;
-      final newGameStats = Map<String, int>.from(currentProfile.gameStats);
-      newGameStats[gameType] = (newGameStats[gameType] ?? 0) + 1;
+      try {
+        final updatedProfile = await _profileRepository.updateXP(xp);
+        emit(ProfileLoaded(updatedProfile));
+      } catch (e) {
+        emit(ProfileError('Failed to add XP: $e'));
+      }
+    }
+  }
 
-      final updatedProfile = currentProfile.copyWith(
-        gameStats: newGameStats,
-        updatedAt: DateTime.now(),
-      );
+  Future<void> selectCharacter(CharacterType character) async {
+    if (state is ProfileLoaded) {
+      try {
+        final currentProfile = (state as ProfileLoaded).profile;
+        final updatedProfile = currentProfile.copyWith(
+          selectedCharacter: character,
+          updatedAt: DateTime.now(),
+        );
+        final savedProfile = await _profileRepository.updateData(
+          updatedProfile,
+        );
+        emit(ProfileLoaded(savedProfile));
+      } catch (e) {
+        emit(ProfileError('Failed to select character: $e'));
+      }
+    }
+  }
 
-      emit(ProfileLoaded(updatedProfile));
+  Future<void> incrementGameWin(String gameType) async {
+    if (state is ProfileLoaded) {
+      try {
+        final updatedProfile = await _profileRepository.updateGameStats(
+          gameType: gameType,
+          won: true,
+        );
+        emit(ProfileLoaded(updatedProfile));
+      } catch (e) {
+        emit(ProfileError('Failed to update game stats: $e'));
+      }
     }
   }
 
@@ -182,6 +181,19 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
+  void spendXP(int amount) {
+    if (state is ProfileLoaded) {
+      final currentProfile = (state as ProfileLoaded).profile;
+      if (currentProfile.xp >= amount) {
+        final updatedProfile = currentProfile.copyWith(
+          xp: currentProfile.xp - amount,
+          updatedAt: DateTime.now(),
+        );
+        emit(ProfileLoaded(updatedProfile));
+      }
+    }
+  }
+
   void purchaseShopItem(String itemId) {
     if (state is ProfileLoaded) {
       final currentProfile = (state as ProfileLoaded).profile;
@@ -201,18 +213,135 @@ class ProfileCubit extends Cubit<ProfileState> {
     return (level * 1000) + ((level - 1) * 200);
   }
 
-  // Calculate level from total XP
-  int _calculateLevelFromXP(int totalXP) {
-    if (totalXP < 1000) return 1;
+  // Activity tracking methods
+  Future<void> addGameActivity({
+    required ActivityType type,
+    required GameType gameType,
+    required String difficulty,
+    int xpEarned = 0,
+    Map<String, dynamic>? metadata,
+  }) async {
+    print(
+      '🎮 Adding game activity: $type for $gameType on $difficulty difficulty',
+    );
+    if (state is ProfileLoaded) {
+      try {
+        final currentProfile = (state as ProfileLoaded).profile;
+        final activity = GameActivity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: type,
+          gameType: gameType,
+          title: _getActivityTitle(type, gameType, difficulty),
+          description: _getActivityDescription(
+            type,
+            gameType,
+            difficulty,
+            xpEarned,
+          ),
+          xpEarned: xpEarned,
+          metadata: {'difficulty': difficulty, ...?metadata},
+          timestamp: DateTime.now(),
+        );
 
-    int level = 1;
-    int xpForLevel = 1000;
+        print(
+          '📝 Created activity: ${activity.title} - ${activity.description}',
+        );
 
-    while (totalXP >= xpForLevel) {
-      level++;
-      xpForLevel = _calculateLevelXP(level);
+        final updatedActivities = [activity, ...currentProfile.activityHistory];
+        // Keep only the last 100 activities to prevent unlimited growth
+        final limitedActivities = updatedActivities.take(100).toList();
+
+        final updatedProfile = currentProfile.copyWith(
+          activityHistory: limitedActivities,
+          updatedAt: DateTime.now(),
+        );
+
+        print('💾 Saving profile with ${limitedActivities.length} activities');
+        final savedProfile = await _profileRepository.updateData(
+          updatedProfile,
+        );
+        emit(ProfileLoaded(savedProfile));
+        print(
+          '✅ Activity successfully saved! Total activities: ${savedProfile.activityHistory.length}',
+        );
+      } catch (e) {
+        print('❌ Failed to add activity: $e');
+        emit(ProfileError('Failed to add activity: $e'));
+      }
+    } else {
+      print('⚠️ Profile not loaded, cannot add activity');
     }
+  }
 
-    return level - 1; // Return the completed level
+  String _getActivityTitle(
+    ActivityType type,
+    GameType gameType,
+    String difficulty,
+  ) {
+    final gameName = ActivityHelper.getGameDisplayName(gameType);
+    final difficultyName = ActivityHelper.getDifficultyDisplayName(difficulty);
+
+    switch (type) {
+      case ActivityType.gameWin:
+        return '$gameName Victory';
+      case ActivityType.gameLoss:
+        return '$gameName Defeat';
+      case ActivityType.gameDraw:
+        return '$gameName Draw';
+      default:
+        return '$gameName Game';
+    }
+  }
+
+  String _getActivityDescription(
+    ActivityType type,
+    GameType gameType,
+    String difficulty,
+    int xpEarned,
+  ) {
+    final gameName = ActivityHelper.getGameDisplayName(gameType);
+    final difficultyName = ActivityHelper.getDifficultyDisplayName(difficulty);
+
+    switch (type) {
+      case ActivityType.gameWin:
+        return 'Won $gameName on $difficultyName difficulty${xpEarned > 0 ? ' (+$xpEarned XP)' : ''}';
+      case ActivityType.gameLoss:
+        return 'Lost $gameName on $difficultyName difficulty';
+      case ActivityType.gameDraw:
+        return 'Drew $gameName on $difficultyName difficulty${xpEarned > 0 ? ' (+$xpEarned XP)' : ''}';
+      default:
+        return 'Played $gameName on $difficultyName difficulty';
+    }
+  }
+
+  Future<void> addLevelUpActivity(int newLevel) async {
+    if (state is ProfileLoaded) {
+      try {
+        final currentProfile = (state as ProfileLoaded).profile;
+        final activity = GameActivity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: ActivityType.levelUp,
+          title: 'Level Up!',
+          description: 'Reached level $newLevel',
+          metadata: {'newLevel': newLevel},
+          timestamp: DateTime.now(),
+        );
+
+        final updatedActivities = [activity, ...currentProfile.activityHistory];
+        final limitedActivities = updatedActivities.take(100).toList();
+
+        final updatedProfile = currentProfile.copyWith(
+          activityHistory: limitedActivities,
+          updatedAt: DateTime.now(),
+        );
+
+        final savedProfile = await _profileRepository.updateData(
+          updatedProfile,
+        );
+        emit(ProfileLoaded(savedProfile));
+      } catch (e) {
+        emit(ProfileError('Failed to add level up activity: $e'));
+      }
+    }
   }
 }

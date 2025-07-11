@@ -7,15 +7,14 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../../shared/widgets/glass_widgets.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
-import '../../../characters/presentation/cubit/character_cubit.dart';
+import '../../../profile/presentation/pages/activity_history_page.dart';
 import '../../../games/presentation/cubit/game_cubit.dart';
 import '../../../games/domain/entities/game.dart';
-import '../../../characters/domain/entities/character.dart';
 import '../widgets/game_card.dart';
 import '../widgets/character_selector.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/daily_challenges.dart';
-import '../../../characters/presentation/pages/characters_page.dart';
+import '../widgets/difficulty_selection_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -45,7 +44,6 @@ class _HomePageState extends State<HomePage> {
             children: [
               const HomePageContent(),
               const GamesPageContent(),
-              CharactersPage(),
               const _LeaderboardPage(),
               const _ProfilePage(),
             ],
@@ -66,11 +64,11 @@ class _HomePageState extends State<HomePage> {
             activeIcon: Icons.games,
             label: 'Games',
           ),
-          GlassBottomNavigationBarItem(
-            icon: Icons.people_outline,
-            activeIcon: Icons.people,
-            label: 'Characters',
-          ),
+          // GlassBottomNavigationBarItem(
+          //   icon: Icons.people_outline,
+          //   activeIcon: Icons.people,
+          //   label: 'Characters',
+          // ),
           GlassBottomNavigationBarItem(
             icon: Icons.leaderboard_outlined,
             activeIcon: Icons.leaderboard,
@@ -283,7 +281,67 @@ class GamesPageContent extends StatelessWidget {
                     childAspectRatio: 0.7,
                   ),
                 );
+              } else if (state is GameCompleted) {
+                // When game is completed, automatically return to games list
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.read<GameCubit>().returnToGamesList();
+                });
+                // Show games while transitioning
+                final games = GameRepository.getAllGames();
+                return SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final game = games[index];
+                    return GameCard(
+                      game: game,
+                      onTap: () => _startGame(context, game),
+                    );
+                  }, childCount: games.length),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.w,
+                    mainAxisSpacing: 16.h,
+                    childAspectRatio: 0.7,
+                  ),
+                );
+              } else if (state is GamePlaying) {
+                // Show games list even when a game is playing
+                final games = GameRepository.getAllGames();
+                return SliverGrid(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final game = games[index];
+                    return GameCard(
+                      game: game,
+                      onTap: () => _startGame(context, game),
+                    );
+                  }, childCount: games.length),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16.w,
+                    mainAxisSpacing: 16.h,
+                    childAspectRatio: 0.7,
+                  ),
+                );
+              } else if (state is GameError) {
+                return SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      Icon(Icons.error, size: 48, color: Colors.red),
+                      SizedBox(height: 16),
+                      Text(
+                        'Failed to load games',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () =>
+                            context.read<GameCubit>().reloadGames(),
+                        child: Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
               }
+              // Loading state or initial state
               return const SliverToBoxAdapter(
                 child: Center(child: CircularProgressIndicator()),
               );
@@ -295,13 +353,49 @@ class GamesPageContent extends StatelessWidget {
   }
 
   void _startGame(BuildContext context, GameMetadata game) {
-    // Navigate to game screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Starting ${game.name}...'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+    // Show difficulty selection dialog first
+    showDialog(
+      context: context,
+      builder: (context) => DifficultySelectionDialog(
+        game: game,
+        onDifficultySelected: (difficulty) {
+          Navigator.pop(context);
+          _navigateToGame(context, game, difficulty);
+        },
       ),
     );
+  }
+
+  void _navigateToGame(
+    BuildContext context,
+    GameMetadata game,
+    GameDifficulty difficulty,
+  ) {
+    switch (game.type) {
+      case GameType.rockPaperScissors:
+        Navigator.pushNamed(
+          context,
+          '/rock-paper-scissors',
+          arguments: difficulty,
+        );
+        break;
+      case GameType.ticTacToe:
+        Navigator.pushNamed(context, '/tic-tac-toe', arguments: difficulty);
+        break;
+      case GameType.memoryCards:
+        Navigator.pushNamed(context, '/memory-cards', arguments: difficulty);
+        break;
+      case GameType.ballBlaster:
+        Navigator.pushNamed(context, '/ball-blaster', arguments: difficulty);
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${game.name} is coming soon!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+    }
   }
 }
 
@@ -426,6 +520,19 @@ class _ProfilePage extends StatelessWidget {
                             icon: Icons.notifications_outlined,
                             title: 'Notifications',
                             onTap: () {},
+                          ),
+                          _SettingsItem(
+                            icon: Icons.history,
+                            title: 'Activity History',
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ActivityHistoryPage(),
+                                ),
+                              );
+                            },
                           ),
                           BlocBuilder<ThemeCubit, ThemeState>(
                             builder: (context, themeState) {

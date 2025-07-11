@@ -441,8 +441,23 @@ class _ShopPageState extends State<ShopPage> {
                                 item,
                                 userXP,
                               );
-                              if (item.currencyType == CurrencyType.xp) {
-                                context.read<ProfileCubit>().addXP(-item.price);
+                              // Handle currency deduction based on type
+                              switch (item.currencyType) {
+                                case CurrencyType.coins:
+                                  context.read<ProfileCubit>().spendCoins(
+                                    item.price,
+                                  );
+                                  break;
+                                case CurrencyType.gems:
+                                  context.read<ProfileCubit>().spendGems(
+                                    item.price,
+                                  );
+                                  break;
+                                case CurrencyType.xp:
+                                  context.read<ProfileCubit>().spendXP(
+                                    item.price,
+                                  );
+                                  break;
                               }
                             }
                           : null,

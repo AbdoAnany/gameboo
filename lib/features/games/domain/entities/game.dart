@@ -1,6 +1,16 @@
 import 'package:equatable/equatable.dart';
 
-enum GameType { cardShooter, ballBlaster, racingRush, puzzleMania, droneFlight }
+enum GameType {
+  rockPaperScissors,
+  ticTacToe,
+  memoryCards,
+  shootingGame,
+  carRacing,
+  droneFlight,
+  mcqQuiz,
+  ballBlaster,
+  towerBuilding,
+}
 
 enum GameDifficulty { easy, medium, hard, expert }
 
@@ -144,7 +154,7 @@ class GameSession extends Equatable {
       id: json['id'] ?? '',
       gameType: GameType.values.firstWhere(
         (e) => e.name == json['gameType'],
-        orElse: () => GameType.cardShooter,
+        orElse: () => GameType.rockPaperScissors,
       ),
       difficulty: GameDifficulty.values.firstWhere(
         (e) => e.name == json['difficulty'],
@@ -259,7 +269,7 @@ class LeaderboardEntry extends Equatable {
       country: json['country'],
       gameType: GameType.values.firstWhere(
         (e) => e.name == json['gameType'],
-        orElse: () => GameType.cardShooter,
+        orElse: () => GameType.rockPaperScissors,
       ),
       difficulty: json['difficulty'] != null
           ? GameDifficulty.values.firstWhere(
@@ -293,18 +303,110 @@ class LeaderboardEntry extends Equatable {
 class GameRepository {
   static const List<GameMetadata> games = [
     GameMetadata(
-      type: GameType.cardShooter,
-      name: 'Card Shooter',
-      description: 'Shoot cards at moving targets with increasing difficulty',
-      thumbnailPath: 'assets/images/games/card_shooter_thumb.png',
-      iconPath: 'assets/images/games/card_shooter_icon.png',
+      type: GameType.rockPaperScissors,
+      name: 'Rock Paper Scissors',
+      description: 'Classic game against AI with multiple difficulty levels',
+      thumbnailPath: 'assets/images/games/rock_paper_scissors_thumb.png',
+      iconPath: 'assets/images/games/rock_paper_scissors_icon.png',
       availableDifficulties: [
         GameDifficulty.easy,
         GameDifficulty.medium,
         GameDifficulty.hard,
         GameDifficulty.expert,
       ],
-      gameSettings: {'maxCards': 20, 'timeLimit': 60, 'targetSpeed': 2.0},
+      gameSettings: {'rounds': 5, 'timeLimit': 10, 'aiStrategy': 'adaptive'},
+    ),
+    GameMetadata(
+      type: GameType.ticTacToe,
+      name: 'Tic Tac Toe',
+      description: 'Strategic 3x3 grid game with smart AI opponent',
+      thumbnailPath: 'assets/images/games/tic_tac_toe_thumb.png',
+      iconPath: 'assets/images/games/tic_tac_toe_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {'boardSize': 3, 'aiDepth': 5, 'firstPlayer': 'player'},
+    ),
+    GameMetadata(
+      type: GameType.memoryCards,
+      name: 'Memory Cards',
+      description: 'Test your memory with matching card pairs',
+      thumbnailPath: 'assets/images/games/memory_cards_thumb.png',
+      iconPath: 'assets/images/games/memory_cards_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {'gridSize': 4, 'timeLimit': 120, 'maxMistakes': 5},
+    ),
+    GameMetadata(
+      type: GameType.shootingGame,
+      name: 'Shooting Game',
+      description: 'Fast-paced shooting with moving targets',
+      thumbnailPath: 'assets/images/games/shooting_game_thumb.png',
+      iconPath: 'assets/images/games/shooting_game_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {'ammo': 30, 'timeLimit': 60, 'targetSpeed': 2.0},
+      unlockLevel: 2,
+    ),
+    GameMetadata(
+      type: GameType.carRacing,
+      name: 'Car Racing',
+      description: '2D racing with obstacles and time challenges',
+      thumbnailPath: 'assets/images/games/car_racing_thumb.png',
+      iconPath: 'assets/images/games/car_racing_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {'laps': 3, 'maxSpeed': 200.0, 'obstacleCount': 15},
+      unlockLevel: 3,
+    ),
+    GameMetadata(
+      type: GameType.droneFlight,
+      name: 'Drone Flight',
+      description: 'Navigate drone through obstacles and checkpoints',
+      thumbnailPath: 'assets/images/games/drone_flight_thumb.png',
+      iconPath: 'assets/images/games/drone_flight_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {'checkpoints': 5, 'maxSpeed': 150.0, 'obstacleCount': 20},
+      unlockLevel: 4,
+    ),
+    GameMetadata(
+      type: GameType.mcqQuiz,
+      name: 'MCQ Quiz',
+      description: 'Multiple choice questions across various topics',
+      thumbnailPath: 'assets/images/games/mcq_quiz_thumb.png',
+      iconPath: 'assets/images/games/mcq_quiz_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {
+        'questionsCount': 10,
+        'timePerQuestion': 30,
+        'categories': ['general', 'science', 'history'],
+      },
+      unlockLevel: 5,
     ),
     GameMetadata(
       type: GameType.ballBlaster,
@@ -319,54 +421,21 @@ class GameRepository {
         GameDifficulty.expert,
       ],
       gameSettings: {'maxBalls': 5, 'bricksPerLevel': 30, 'ballSpeed': 300.0},
+      unlockLevel: 6,
     ),
     GameMetadata(
-      type: GameType.racingRush,
-      name: 'Racing Rush',
-      description: '2D racing game with obstacles and time constraints',
-      thumbnailPath: 'assets/images/games/racing_rush_thumb.png',
-      iconPath: 'assets/images/games/racing_rush_icon.png',
+      type: GameType.towerBuilding,
+      name: 'Tower Building',
+      description: 'Stack blocks to build the highest tower possible',
+      thumbnailPath: 'assets/images/games/tower_building_thumb.png',
+      iconPath: 'assets/images/games/tower_building_icon.png',
       availableDifficulties: [
         GameDifficulty.easy,
         GameDifficulty.medium,
         GameDifficulty.hard,
         GameDifficulty.expert,
       ],
-      gameSettings: {'laps': 3, 'maxSpeed': 200.0, 'obstacleCount': 15},
-      unlockLevel: 3,
-    ),
-    GameMetadata(
-      type: GameType.puzzleMania,
-      name: 'Puzzle Mania',
-      description: 'Classic logic puzzles including match-3 and tile swap',
-      thumbnailPath: 'assets/images/games/puzzle_mania_thumb.png',
-      iconPath: 'assets/images/games/puzzle_mania_icon.png',
-      availableDifficulties: [
-        GameDifficulty.easy,
-        GameDifficulty.medium,
-        GameDifficulty.hard,
-        GameDifficulty.expert,
-      ],
-      gameSettings: {
-        'gridSize': 8,
-        'moveLimit': 30,
-        'puzzleTypes': ['match3', 'tileSwap'],
-      },
-      unlockLevel: 5,
-    ),
-    GameMetadata(
-      type: GameType.droneFlight,
-      name: 'Drone Flight',
-      description: 'Control drone through obstacles and checkpoints',
-      thumbnailPath: 'assets/images/games/drone_flight_thumb.png',
-      iconPath: 'assets/images/games/drone_flight_icon.png',
-      availableDifficulties: [
-        GameDifficulty.easy,
-        GameDifficulty.medium,
-        GameDifficulty.hard,
-        GameDifficulty.expert,
-      ],
-      gameSettings: {'checkpoints': 5, 'maxSpeed': 150.0, 'obstacleCount': 20},
+      gameSettings: {'maxBlocks': 20, 'swayIntensity': 1.0, 'gravity': 9.8},
       unlockLevel: 7,
     ),
   ];

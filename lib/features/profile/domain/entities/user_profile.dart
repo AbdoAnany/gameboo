@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../characters/domain/entities/character.dart';
+import 'game_activity.dart';
 
 enum BadgeType { bronze, silver, gold, diamond }
 
@@ -125,6 +126,9 @@ class UserProfile extends Equatable {
   final int gems;
   final List<String> ownedShopItems;
 
+  // Activity History
+  final List<GameActivity> activityHistory;
+
   const UserProfile({
     required this.id,
     required this.username,
@@ -144,6 +148,7 @@ class UserProfile extends Equatable {
     this.coins = 1000,
     this.gems = 50,
     this.ownedShopItems = const [],
+    this.activityHistory = const [],
   });
 
   // Progressive XP calculation: Level 1 = 1000 XP, Level 2 = 2200 XP, Level 3 = 3600 XP, etc.
@@ -199,6 +204,7 @@ class UserProfile extends Equatable {
     int? coins,
     int? gems,
     List<String>? ownedShopItems,
+    List<GameActivity>? activityHistory,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -219,6 +225,7 @@ class UserProfile extends Equatable {
       coins: coins ?? this.coins,
       gems: gems ?? this.gems,
       ownedShopItems: ownedShopItems ?? this.ownedShopItems,
+      activityHistory: activityHistory ?? this.activityHistory,
     );
   }
 
@@ -242,6 +249,9 @@ class UserProfile extends Equatable {
       'coins': coins,
       'gems': gems,
       'ownedShopItems': ownedShopItems,
+      'activityHistory': activityHistory
+          .map((activity) => activity.toJson())
+          .toList(),
     };
   }
 
@@ -276,6 +286,9 @@ class UserProfile extends Equatable {
       coins: json['coins'] ?? 1000,
       gems: json['gems'] ?? 50,
       ownedShopItems: List<String>.from(json['ownedShopItems'] ?? []),
+      activityHistory: (json['activityHistory'] as List<dynamic>? ?? [])
+          .map((activityJson) => GameActivity.fromJson(activityJson))
+          .toList(),
     );
   }
 
@@ -299,6 +312,7 @@ class UserProfile extends Equatable {
     coins,
     gems,
     ownedShopItems,
+    activityHistory,
   ];
 }
 
