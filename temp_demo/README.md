@@ -18,3 +18,5 @@ This folder is for temporary demo files and experiments.
 ## Note
 
 This folder keeps demo work separate from the main GameX project to avoid confusion.
+
+

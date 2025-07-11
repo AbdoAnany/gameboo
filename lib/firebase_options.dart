@@ -64,8 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '77702366173',
     projectId: 'hr360-f8636',
     storageBucket: 'hr360-f8636.firebasestorage.app',
-    iosClientId:
-        '77702366173-9r61og1jhlk8rhdchj5tstq17iafgmd3.apps.googleusercontent.com',
+    iosClientId: '77702366173-9r61og1jhlk8rhdchj5tstq17iafgmd3.apps.googleusercontent.com',
     iosBundleId: 'com.abdoanany.gameboo',
   );
 

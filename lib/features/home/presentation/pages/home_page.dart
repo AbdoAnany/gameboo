@@ -15,7 +15,7 @@ import '../widgets/game_card.dart';
 import '../widgets/character_selector.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/daily_challenges.dart';
-import '../../../shop/presentation/pages/shop_page.dart';
+import '../../../characters/presentation/pages/characters_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -42,25 +42,15 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: IndexedStack(
             index: _selectedIndex,
-            children: const [
-              _HomePage(),
-              _GamesPage(),
-              _CharactersPage(),
-              _LeaderboardPage(),
-              _ProfilePage(),
+            children: [
+              const HomePageContent(),
+              const GamesPageContent(),
+              CharactersPage(),
+              const _LeaderboardPage(),
+              const _ProfilePage(),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ShopPage()),
-          );
-        },
-        backgroundColor: theme.colorScheme.primary,
-        child: const Icon(Icons.shopping_bag, color: Colors.white),
       ),
       bottomNavigationBar: GlassBottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -97,8 +87,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _HomePage extends StatelessWidget {
-  const _HomePage();
+class HomePageContent extends StatelessWidget {
+  const HomePageContent();
 
   @override
   Widget build(BuildContext context) {
@@ -261,8 +251,8 @@ class _HomePage extends StatelessWidget {
   }
 }
 
-class _GamesPage extends StatelessWidget {
-  const _GamesPage();
+class GamesPageContent extends StatelessWidget {
+  const GamesPageContent();
 
   @override
   Widget build(BuildContext context) {
@@ -310,112 +300,6 @@ class _GamesPage extends StatelessWidget {
       SnackBar(
         content: Text('Starting ${game.name}...'),
         backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-}
-
-class _CharactersPage extends StatelessWidget {
-  const _CharactersPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          title: const Text('Characters'),
-          backgroundColor: Colors.transparent,
-          floating: true,
-        ),
-        SliverPadding(
-          padding: EdgeInsets.all(20.w),
-          sliver: BlocBuilder<CharacterCubit, CharacterState>(
-            builder: (context, state) {
-              if (state is CharacterLoaded) {
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final character = state.characters[index];
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 16.h),
-                      child: _CharacterCard(character: character),
-                    );
-                  }, childCount: state.characters.length),
-                );
-              }
-              return const SliverToBoxAdapter(
-                child: Center(child: CircularProgressIndicator()),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CharacterCard extends StatelessWidget {
-  final Character character;
-
-  const _CharacterCard({required this.character});
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassCard(
-      onTap: () {
-        if (character.isUnlocked) {
-          context.read<CharacterCubit>().selectCharacter(character.type);
-        }
-      },
-      child: Row(
-        children: [
-          Container(
-            width: 60.w,
-            height: 60.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppTheme.primaryGradient,
-            ),
-            child: Icon(Icons.person, size: 30.w, color: Colors.white),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  character.name,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  character.specialty,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                SizedBox(height: 8.h),
-                if (!character.isUnlocked) ...[
-                  Text(
-                    character.unlockRequirement.description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ] else ...[
-                  Text(
-                    'Level ${character.level}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (!character.isUnlocked)
-            Icon(
-              Icons.lock_outline,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-            ),
-        ],
       ),
     );
   }

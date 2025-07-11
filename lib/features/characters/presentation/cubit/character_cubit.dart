@@ -35,21 +35,52 @@ class CharacterError extends CharacterState {
 
 // Character Cubit
 class CharacterCubit extends Cubit<CharacterState> {
+  // These fields are set by the profile/user state
+  int _userLevel = 1;
+  int _userXP = 0;
+  int _userBadges = 0;
+  int _userWins = 0;
+
   CharacterCubit() : super(CharacterInitial()) {
     _loadCharacters();
   }
 
   void _loadCharacters() {
     emit(CharacterLoading());
-
     try {
-      // Load characters from repository
       final characters = CharacterRepository.getAllCharacters();
-      final selectedCharacter = characters.first; // Default to Nova
-
+      final selectedCharacter = characters.first;
       emit(CharacterLoaded(characters, selectedCharacter));
     } catch (e) {
       emit(CharacterError(e.toString()));
+    }
+  }
+
+  // Call this when the user profile changes (level, xp, badges, wins)
+  void updateUserProgress({
+    required int level,
+    required int xp,
+    required int badges,
+    required int wins,
+  }) {
+    _userLevel = level;
+    _userXP = xp;
+    _userBadges = badges;
+    _userWins = wins;
+    // Optionally, update unlock status for all characters
+    if (state is CharacterLoaded) {
+      final currentState = state as CharacterLoaded;
+      final updatedCharacters = currentState.characters.map((character) {
+        final unlocked = isCharacterUnlocked(
+          character.type,
+          _userLevel,
+          _userXP,
+          _userBadges,
+          _userWins,
+        );
+        return character.copyWith(isUnlocked: unlocked);
+      }).toList();
+      emit(CharacterLoaded(updatedCharacters, currentState.selectedCharacter));
     }
   }
 
@@ -108,7 +139,6 @@ class CharacterCubit extends Cubit<CharacterState> {
     int userWins,
   ) {
     final character = CharacterRepository.getCharacterByType(characterType);
-
     switch (character.unlockRequirement.type) {
       case CharacterUnlockType.default_:
         return true;
@@ -121,5 +151,20 @@ class CharacterCubit extends Cubit<CharacterState> {
       case CharacterUnlockType.wins:
         return userWins >= character.unlockRequirement.value;
     }
+  }
+
+  // Helper to get unlock status for all characters
+  Map<CharacterType, bool> getAllUnlockStatus() {
+    final status = <CharacterType, bool>{};
+    for (final type in CharacterType.values) {
+      status[type] = isCharacterUnlocked(
+        type,
+        _userLevel,
+        _userXP,
+        _userBadges,
+        _userWins,
+      );
+    }
+    return status;
   }
 }
