@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run GameX App",
+      "type": "shell",
+      "command": "flutter",
+      "args": ["run"],
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": ["$dart-flutter"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
+}
