@@ -226,10 +226,10 @@ class _CarRacingGameState extends State<CarRacingGame>
     _endGame();
   }
 
-  void _endGame() {
+  void _endGame() async{
     final xpEarned = _calculateXP();
 
-    context.read<ProfileCubit>().addGameActivity(
+    await context.read<ProfileCubit>().addGameActivity(
       type: gameCompleted
           ? activity.ActivityType.gameWin
           : activity.ActivityType.gameLoss,

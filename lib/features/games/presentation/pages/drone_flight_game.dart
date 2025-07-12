@@ -363,10 +363,10 @@ class _DroneFlightGameState extends State<DroneFlightGame>
     _endGame(true);
   }
 
-  void _endGame(bool won) {
+  void _endGame(bool won) async{
     final xpEarned = _calculateXP(won);
 
-    context.read<ProfileCubit>().addGameActivity(
+   await context.read<ProfileCubit>().addGameActivity(
       type: won
           ? activity.ActivityType.gameWin
           : activity.ActivityType.gameLoss,

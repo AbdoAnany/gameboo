@@ -373,7 +373,7 @@ class _PuzzleManiaGameState extends State<PuzzleManiaGame>
     }
   }
 
-  void _endGame(bool won) {
+  void _endGame(bool won) async{
     setState(() {
       gameCompleted = true;
       gameTime = DateTime.now().difference(gameStartTime);
@@ -383,7 +383,7 @@ class _PuzzleManiaGameState extends State<PuzzleManiaGame>
 
     final xpEarned = _calculateXP(won);
 
-    context.read<ProfileCubit>().addGameActivity(
+    await context.read<ProfileCubit>().addGameActivity(
       type: won
           ? activity.ActivityType.gameWin
           : activity.ActivityType.gameLoss,

@@ -12,6 +12,18 @@ int calculateLevelXP(int level) {
   }
   return xp;
 }
+int calculateLevelByXP(int xp) {
+  if (xp < 1000) return 1;
+  int level = 1;
+  int totalXP = 1000;
+
+  while (totalXP <= xp) {
+    level++;
+    totalXP += 1000 + (level - 1) * 200;
+  }
+
+  return level - 1; // Return the last valid level
+}
 
 int xpRequiredForLevel(int level) {
   return calculateLevelXP(level) - calculateLevelXP(level - 1);
@@ -38,15 +50,25 @@ class LevelProgressModel {
     required this.progressPercent,
   });
 
-  factory LevelProgressModel.fromXP(int xp, int level) {
-    final previousXP = calculateLevelXP(level - 1);
-    final nextXP = calculateLevelXP(level);
-    final progress = ((xp - previousXP) / (nextXP - previousXP))
-        .clamp(0, 1)
-        .toDouble();
+  factory LevelProgressModel.fromXP(int xp) {
+    // Calculate current level from XP
+    final currentLevel = calculateLevelByXP(xp);
+
+    // Calculate previous level XP (handle level 1 case)
+    final previousXP = currentLevel <= 1 ? 0 : calculateLevelXP(currentLevel - 1);
+
+    // Calculate next level XP
+    final nextXP = calculateLevelXP(currentLevel + 1);
+
+    // Calculate progress percentage
+    final xpInCurrentLevel = xp - previousXP;
+    final xpRequiredForCurrentLevel = nextXP - previousXP;
+    final progress = xpRequiredForCurrentLevel > 0
+        ? (xpInCurrentLevel / xpRequiredForCurrentLevel).clamp(0.0, 1.0)
+        : 0.0;
 
     return LevelProgressModel(
-      currentLevel: level,
+      currentLevel: currentLevel,
       totalXP: xp,
       previousLevelXP: previousXP,
       nextLevelXP: nextXP,
@@ -54,7 +76,6 @@ class LevelProgressModel {
     );
   }
 }
-
 // badge.dart
 enum BadgeType { bronze, silver, gold, diamond }
 
@@ -215,12 +236,14 @@ class UserProfile extends Equatable {
     this.activityHistory = const [],
   });
 
-  double get levelProgress => calculateLevelProgress(xp, level);
-  int get xpToNextLevel => calculateLevelXP(level + 1) - xp;
-  int get xpForCurrentLevel => xpRequiredForLevel(level);
+  // Updated getters to use the calculated level from XP
+  int get calculatedLevel => calculateLevelByXP(xp);
+  double get levelProgress => calculateLevelProgress(xp, calculatedLevel);
+  int get xpToNextLevel => calculateLevelXP(calculatedLevel + 1) - xp;
+  int get xpForCurrentLevel => xpRequiredForLevel(calculatedLevel);
   int get totalWins => gameStats.values.fold(0, (sum, e) => sum + e);
   List<Badge> get earnedBadges => badges.where((e) => e.isEarned).toList();
-  LevelProgressModel get progressModel => LevelProgressModel.fromXP(xp, level);
+  LevelProgressModel get progressModel => LevelProgressModel.fromXP(xp);
 
   //copyWith
   UserProfile copyWith({
@@ -289,8 +312,12 @@ class UserProfile extends Equatable {
     ownedShopItems,
     activityHistory,
   ];
+
   //fromJson
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final xp = json['xp'] ?? 0;
+    final calculatedLevel = calculateLevelByXP(xp);
+
     return UserProfile(
       id: json['id'] ?? '',
       username: json['username'] ?? '',
@@ -298,19 +325,19 @@ class UserProfile extends Equatable {
       avatarUrl: json['avatarUrl'],
       country: json['country'],
       rank: UserRankType.values.firstWhere(
-        (e) => e.name == json['rank'],
+            (e) => e.name == json['rank'],
         orElse: () => UserRankType.basic,
       ),
-      xp: json['xp'] ?? 0,
-      level: json['level'] ?? 1,
+      xp: xp,
+      level: json['level'] ?? calculatedLevel, // Use calculated level if not provided
       selectedCharacter: CharacterType.values.firstWhere(
-        (e) => e.name == json['selectedCharacter'],
+            (e) => e.name == json['selectedCharacter'],
         orElse: () => CharacterType.nova,
       ),
       badges:
-          (json['badges'] as List<dynamic>?)
-              ?.map((e) => Badge.fromJson(Map<String, dynamic>.from(e)))
-              .toList() ??
+      (json['badges'] as List<dynamic>?)
+          ?.map((e) => Badge.fromJson(Map<String, dynamic>.from(e)))
+          .toList() ??
           [],
       gameStats: Map<String, int>.from(json['gameStats'] ?? {}),
       streak: json['streak'] ?? 0,
@@ -323,12 +350,13 @@ class UserProfile extends Equatable {
       gems: json['gems'] ?? 50,
       ownedShopItems: List<String>.from(json['ownedShopItems'] ?? const []),
       activityHistory:
-          (json['activityHistory'] as List<dynamic>?)
-              ?.map((e) => GameActivity.fromJson(Map<String, dynamic>.from(e)))
-              .toList() ??
+      (json['activityHistory'] as List<dynamic>?)
+          ?.map((e) => GameActivity.fromJson(Map<String, dynamic>.from(e)))
+          .toList() ??
           [],
     );
   }
+
   // toJson
   Map<String, dynamic> toJson() {
     return {
@@ -339,7 +367,7 @@ class UserProfile extends Equatable {
       'country': country,
       'rank': rank.name,
       'xp': xp,
-      'level': level,
+      'level': calculatedLevel, // Save the calculated level
       'selectedCharacter': selectedCharacter.name,
       'badges': badges.map((e) => e.toJson()).toList(),
       'gameStats': gameStats,

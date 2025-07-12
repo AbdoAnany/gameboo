@@ -39,6 +39,8 @@ class CacheService {
     final jsonData = cacheEntry.toJson();
     await _prefs!.setString(key, jsonData);
 
+    log('✅ Cached data for cacheEntry: ${cacheEntry.toJson()}');
+    log('✅ Cached data for jsonData: ${jsonData}');
     log('✅ Cached data for key: $key');
   }
 
@@ -51,8 +53,11 @@ class CacheService {
     await initialize();
 
     final jsonData = _prefs!.getString(key);
+    
+    print("jsonData key: $key");
+    print("jsonData retrieve: $jsonData");
     if (jsonData == null) {
-      log('❌ No cached data for key: $key');
+      log('❌  No cached data for key: $key');
       return null;
     }
 

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../domain/entities/shop_item.dart';
 import '../../../characters/domain/entities/character.dart';
 
@@ -61,7 +62,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/tickets/golden_ticket.png',
         type: ShopItemType.ticket,
         currencyType: CurrencyType.coins,
-        price: 500,
+        price: 5000,
         properties: {
           'duration': 3600, // 1 hour in seconds
           'xpMultiplier': 2.0,
@@ -74,7 +75,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/tickets/diamond_ticket.png',
         type: ShopItemType.ticket,
         currencyType: CurrencyType.gems,
-        price: 50,
+        price: 5000,
         properties: {
           'duration': 1800, // 30 minutes
           'scoreMultiplier': 2.0,
@@ -89,7 +90,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/monsters/fire_dragon.png',
         type: ShopItemType.monster,
         currencyType: CurrencyType.coins,
-        price: 2000,
+        price: 20000,
         properties: {'damageBoost': 25, 'element': 'fire'},
       ),
       ShopItem(
@@ -99,7 +100,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/monsters/ice_phoenix.png',
         type: ShopItemType.monster,
         currencyType: CurrencyType.gems,
-        price: 100,
+        price: 10000,
         properties: {'freezeChance': 30, 'element': 'ice'},
       ),
       ShopItem(
@@ -121,7 +122,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/characters/blitz.png',
         type: ShopItemType.character,
         currencyType: CurrencyType.xp,
-        price: 5000,
+        price: 50000,
         characterType: CharacterType.blitz,
         properties: {'speed': 'high', 'special': 'lightning_dash'},
       ),
@@ -132,7 +133,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/characters/zink.png',
         type: ShopItemType.character,
         currencyType: CurrencyType.gems,
-        price: 150,
+        price: 1500,
         characterType: CharacterType.zink,
         properties: {'tech': 'high', 'special': 'gadget_boost'},
       ),
@@ -145,7 +146,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/powerups/shield.png',
         type: ShopItemType.powerup,
         currencyType: CurrencyType.coins,
-        price: 100,
+        price: 1000,
         properties: {'duration': 30, 'protection': 100},
       ),
       ShopItem(
@@ -155,7 +156,7 @@ class ShopCubit extends Cubit<ShopState> {
         imagePath: 'assets/images/powerups/speed.png',
         type: ShopItemType.powerup,
         currencyType: CurrencyType.coins,
-        price: 75,
+        price: 7500,
         properties: {'duration': 20, 'speedMultiplier': 1.5},
       ),
     ];
@@ -173,7 +174,7 @@ class ShopCubit extends Cubit<ShopState> {
     emit(ShopLoaded(items: shopItems, wallet: finalWallet));
   }
 
-  void purchaseItem(ShopItem item, int userXP) {
+  void purchaseItem(ShopItem item, int userXP,context) {
     if (state is ShopLoaded) {
       final currentState = state as ShopLoaded;
       final wallet = currentState.wallet;
@@ -232,6 +233,7 @@ class ShopCubit extends Cubit<ShopState> {
         }
         return shopItem;
       }).toList();
+      ProfileCubit.singleton().purchaseShopItem(item.id);
 
       emit(ShopPurchaseSuccess(item: item, updatedWallet: updatedWallet));
 

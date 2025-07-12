@@ -1,4 +1,6 @@
 import 'dart:developer';
+import '../../features/characters/domain/entities/character.dart';
+import '../../features/profile/domain/entities/user_profile.dart';
 import '../cache/cache_service.dart';
 
 /// Base repository class implementing stale-while-revalidate pattern
@@ -35,9 +37,29 @@ abstract class CachedRepository<T> {
         fromJson: fromJson,
         maxAge: cacheTTL,
       );
+      print("cacheResult   : ${cacheResult?.data}");
 
       if (cacheResult == null) {
         log('💾 No cached data for $cacheKey, fetching fresh');
+
+       final currentProfile = UserProfile(
+          id: 'default_user',
+          username: 'Player1',
+          coins: 1000,
+          gems: 50,
+          xp: 1,
+          level: 0,
+          rank: UserRankType.basic,
+          badges:[],
+          gameStats:{},
+          ownedShopItems: [],
+          selectedCharacter: CharacterType.blitz,
+          streak: 0,
+          lastPlayedAt: DateTime.now(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(), email: 'player@gameboo.com',
+        );
+        return currentProfile as T;
         return await _fetchAndCache();
       }
 
@@ -82,8 +104,9 @@ abstract class CachedRepository<T> {
   }
 
   /// Update data and cache
-  Future<T> updateData(T data) async {
+  Future<T> updateData(T data,indx) async {
     try {
+      print('🔄 Updating ${indx}data for $cacheKey: ${ toJson(data)}');
       // Store in cache immediately for optimistic updates
       await _cacheService.store(cacheKey, toJson(data), ttl: cacheTTL);
 
@@ -113,6 +136,7 @@ abstract class CachedRepository<T> {
   /// Fetch and cache data
   Future<T> _fetchAndCache() async {
     final freshData = await fetchFromRemote();
+    print('🔄 Fetching _fetchAndCache data for $cacheKey: $freshData');
     await _cacheService.store(cacheKey, toJson(freshData), ttl: cacheTTL);
     return freshData;
   }
@@ -143,7 +167,7 @@ abstract class CachedListRepository<T> {
       if (forceRefresh) {
         return await _fetchAndCacheList();
       }
-
+print('🔄 Retrieving list for $cacheKey with forceRefresh: $forceRefresh');
       final cacheResult = await _cacheService.retrieve<List<dynamic>>(
         cacheKey,
         fromJson: (json) => json['items'] as List<dynamic>,
@@ -180,6 +204,7 @@ abstract class CachedListRepository<T> {
 
   /// Update list and cache
   Future<List<T>> updateList(List<T> data) async {
+    print('🔄 Updating list for $cacheKey: $data');
     await _cacheService.store(cacheKey, {
       'items': data.map((item) => toJson(item)).toList(),
       'count': data.length,
@@ -197,6 +222,7 @@ abstract class CachedListRepository<T> {
   /// Fetch and cache list
   Future<List<T>> _fetchAndCacheList() async {
     final freshData = await fetchFromRemote();
+    print('🔄 Fetching _fetchAndCacheList data for $cacheKey: $freshData');
     await _cacheService.store(cacheKey, {
       'items': freshData.map((item) => toJson(item)).toList(),
       'count': freshData.length,

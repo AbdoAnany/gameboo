@@ -44,15 +44,15 @@ class AppTheme {
   );
 
   // Text Styles
-  static TextStyle _baseTextStyle = GoogleFonts.poppins();
-
+  static TextStyle _baseTextStyle = GoogleFonts.audiowide();
+static String? fontFamily = _baseTextStyle.fontFamily;
   // Light Theme
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     primaryColor: lightPrimary,
     scaffoldBackgroundColor: lightGlassBackground,
-    fontFamily: GoogleFonts.poppins().fontFamily,
+    fontFamily:fontFamily,
 
     colorScheme: const ColorScheme.light(
       primary: lightPrimary,
@@ -164,7 +164,7 @@ class AppTheme {
     brightness: Brightness.dark,
     primaryColor: darkPrimary,
     scaffoldBackgroundColor: darkGlassBackground,
-    fontFamily: GoogleFonts.poppins().fontFamily,
+    fontFamily: fontFamily,
 
     colorScheme: const ColorScheme.dark(
       primary: darkPrimary,

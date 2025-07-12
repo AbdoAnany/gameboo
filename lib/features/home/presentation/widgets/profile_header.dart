@@ -53,57 +53,7 @@ class ProfileHeader extends StatelessWidget {
                       ),
                     ),
 
-                    // if(kIsDebugMode)
-                    // PopupMenuButton<String>(
-                    //   icon: Icon(Icons.more_vert,
-                    //       color: theme.colorScheme.primary),
-                    //   onSelected: (value) {
-                    //     final cubit = context.read<ProfileCubit>();
-                    //     switch (value) {
-                    //       case 'add_xp':
-                    //         cubit.addXP(100);
-                    //         break;
-                    //       case 'level_up':
-                    //         cubit.levelUp();
-                    //         break;
-                    //       case 'reset':
-                    //         cubit.resetProgress();
-                    //         break;
-                    //     }
-                    //   },
-                    //   itemBuilder: (context) => [
-                    //     const PopupMenuItem(
-                    //       value: 'add_xp',
-                    //       child: Row(
-                    //         children: [
-                    //           Icon(Icons.add),
-                    //           SizedBox(width: 8),
-                    //           Text('Add 100 XP'),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     const PopupMenuItem(
-                    //       value: 'level_up',
-                    //       child: Row(
-                    //         children: [
-                    //           Icon(Icons.trending_up),
-                    //           SizedBox(width: 8),
-                    //           Text('Level Up'),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //     const PopupMenuItem(
-                    //       value: 'reset',
-                    //       child: Row(
-                    //         children: [
-                    //           Icon(Icons.refresh),
-                    //           SizedBox(width: 8),
-                    //           Text('Reset Progress'),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
+
                   ],
                 ),
                 SizedBox(height: 12.h),
@@ -114,13 +64,14 @@ class ProfileHeader extends StatelessWidget {
                   builder: (context, animatedPercent, child) {
                     return GlassXPProgressBar(
                       currentXP:
+
                           (progress.previousLevelXP +
                                   (progress.nextLevelXP -
                                           progress.previousLevelXP) *
                                       animatedPercent)
                               .round(),
                       maxXP: progress.nextLevelXP,
-                      level: profile.level,
+                      level: progress.currentLevel,
                       title: 'Progress',
                       height: 60.h,
                       showXPNumbers: true,

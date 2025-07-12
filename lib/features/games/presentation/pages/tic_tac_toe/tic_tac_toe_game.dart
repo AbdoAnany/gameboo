@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-import '../../../../shared/widgets/glass_widgets.dart';
-import '../../../profile/presentation/cubit/profile_cubit.dart';
-import '../../../profile/domain/entities/game_activity.dart' as activity;
-import '../../domain/entities/game.dart';
+import '../../../../../shared/widgets/glass_widgets.dart';
+import '../../../../profile/presentation/cubit/profile_cubit.dart';
+import '../../../../profile/domain/entities/game_activity.dart' as activity;
+import '../../../domain/entities/game.dart';
 
 enum Player { human, ai, none }
 
@@ -115,7 +115,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
     setState(() {
       board[row][col] = currentPlayer;
       _cellAnimationController.forward().then((_) {
-        _cellAnimationController.reset();
+        // _cellAnimationController.reset();
       });
     });
 
@@ -284,6 +284,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
     return Player.none;
   }
 
+// ===================== Board Logic =====================
   bool _isWinningCell(int row, int col) {
     if (winningLine == null) return false;
     return winningLine!.any((cell) => cell[0] == row && cell[1] == col);
@@ -298,25 +299,25 @@ class _TicTacToeGameState extends State<TicTacToeGame>
     }
     return true;
   }
-
+// ===================== Player Logic =====================
   void _switchPlayer() {
     currentPlayer = currentPlayer == Player.human ? Player.ai : Player.human;
   }
-
-  void _endGame() {
+// ===================== Game State =====================
+  void _endGame() async{
     final winner = _checkWinner();
-    setState(() {
+
       gameEnded = true;
       if (winner == Player.human) {
         gameResult = GameResult.win;
         humanWins++;
         // Award XP based on difficulty
         final xpEarned = _calculateXP();
-        context.read<ProfileCubit>().addXP(xpEarned);
-        context.read<ProfileCubit>().incrementGameWin('ticTacToe');
+        await     context.read<ProfileCubit>().addXP(xpEarned);
+        await     context.read<ProfileCubit>().incrementGameWin('ticTacToe');
 
         // Add game activity
-        context.read<ProfileCubit>().addGameActivity(
+        await   context.read<ProfileCubit>().addGameActivity(
           type: activity.ActivityType.gameWin,
           gameType: activity.GameType.ticTacToe,
           difficulty: selectedDifficulty.name,
@@ -331,7 +332,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
         aiWins++;
 
         // Add game activity for loss
-        context.read<ProfileCubit>().addGameActivity(
+        await   context.read<ProfileCubit>().addGameActivity(
           type: activity.ActivityType.gameLoss,
           gameType: activity.GameType.ticTacToe,
           difficulty: selectedDifficulty.name,
@@ -347,7 +348,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
         context.read<ProfileCubit>().addXP(5);
 
         // Add game activity for draw
-        context.read<ProfileCubit>().addGameActivity(
+        await   context.read<ProfileCubit>().addGameActivity(
           type: activity.ActivityType.gameDraw,
           gameType: activity.GameType.ticTacToe,
           difficulty: selectedDifficulty.name,
@@ -358,7 +359,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
           },
         );
       }
-    });
+    setState(()  { });
 
     _winAnimationController.forward();
   }
@@ -529,17 +530,18 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                     ),
                   ),
                 ),
-
+                SizedBox(height: 16.h),
                 // Difficulty Selector
                 AnimationConfiguration.staggeredList(
                   position: 2,
                   duration: const Duration(milliseconds: 375),
                   child: SlideAnimation(
                     verticalOffset: 50.0,
+
                     child: FadeInAnimation(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+
                         child: GlassCard(
+                          padding: EdgeInsets.symmetric(horizontal:  32.w, vertical: 16.h),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -603,16 +605,18 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                             ],
                           ),
                         ),
-                      ),
+
                     ),
                   ),
                 ),
 
-                SizedBox(height: 20.h),
 
                 // Game Board
                 Expanded(
-                  child: AnimationConfiguration.staggeredList(
+                  child:Padding (
+                    padding: EdgeInsets.all(16.w),
+                    child:
+                    AnimationConfiguration.staggeredList(
                     position: 3,
                     duration: const Duration(milliseconds: 375),
                     child: SlideAnimation(
@@ -620,8 +624,8 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                       child: FadeInAnimation(
                         child: Center(
                           child: Container(
-                            width: 300.w,
-                            height: 300.w,
+                            // width: 300.w,
+                            // height: 300.w,
                             child: AnimatedBuilder(
                               animation: _winAnimationController,
                               builder: (context, child) {
@@ -758,7 +762,8 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                       ),
                     ),
                   ),
-                ),
+                ),),
+                SizedBox(height: 16.h),
 
                 // Game Controls
                 AnimationConfiguration.staggeredList(
@@ -768,7 +773,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                     verticalOffset: 50.0,
                     child: FadeInAnimation(
                       child: Padding(
-                        padding: EdgeInsets.all(20.w),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 0.h),
                         child: Row(
                           children: [
                             Expanded(
@@ -778,7 +783,7 @@ class _TicTacToeGameState extends State<TicTacToeGame>
                                     0.1,
                                   ),
                                   foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                                  padding: EdgeInsets.symmetric(vertical: 0.h),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12.r),
                                     side: BorderSide(

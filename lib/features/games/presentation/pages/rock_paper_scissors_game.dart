@@ -206,7 +206,7 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
         (player == RPSChoice.scissors && ai == RPSChoice.paper);
   }
 
-  void _endGame() {
+  Future<void> _endGame() async {
     final isWin = playerScore > aiScore;
     final finalScore = playerScore * 100 + (isWin ? 500 : 0);
     final xpEarned = _calculateXP(finalScore, isWin);
@@ -232,7 +232,7 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
               ? activity.ActivityType.gameDraw
               : activity.ActivityType.gameLoss);
 
-    context.read<ProfileCubit>().addGameActivity(
+  await  context.read<ProfileCubit>().addGameActivity(
       type: gameResult,
       gameType: activity.GameType.rockPaperScissors,
       difficulty: widget.difficulty.name,
@@ -270,6 +270,7 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
       builder: (context) => AlertDialog(
         backgroundColor: Colors.transparent,
         content: GlassCard(
+          width: 400.w,
           child: Padding(
             padding: EdgeInsets.all(20.w),
             child: Column(
@@ -299,7 +300,7 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
                   style: TextStyle(fontSize: 16.sp, color: Colors.white70),
                 ),
                 SizedBox(height: 20.h),
-                Row(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
@@ -309,6 +310,7 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
                       },
                       child: Text('Back to Games'),
                     ),
+                    SizedBox(height: 12.h,),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
@@ -366,6 +368,55 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
         child: SafeArea(
           child: Column(
             children: [
+             Padding(padding: EdgeInsets.symmetric(horizontal: 16.h),child:  Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Text(
+                    'Rock Paper Scissors',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getDifficultyColor(),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Text(
+                      widget.difficulty.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              )),
               _buildHeader(),
               Expanded(child: _buildGameArea()),
               _buildControls(),
@@ -378,113 +429,71 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
 
   Widget _buildHeader() {
     return GlassCard(
-      margin: EdgeInsets.all(16.w),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
+      margin: EdgeInsets.symmetric(horizontal:  16.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.sp),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Column(
+            children: [
+              Text(
+                'You',
+                style: TextStyle(fontSize: 16.sp, color: Colors.white70),
+              ),
+              Text(
+                '$playerScore',
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                Text(
-                  'Rock Paper Scissors',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              Text(
+                'Round $currentRound/$maxRounds',
+                style: TextStyle(fontSize: 14.sp, color: Colors.white70),
+              ),
+              SizedBox(height: 4.h),
+              Container(
+                width: 100.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.white30,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: currentRound / maxRounds,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getDifficultyColor(),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    widget.difficulty.name.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              Text(
+                'AI',
+                style: TextStyle(fontSize: 16.sp, color: Colors.white70),
+              ),
+              Text(
+                '$aiScore',
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      'You',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-                    ),
-                    Text(
-                      '$playerScore',
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Round $currentRound/$maxRounds',
-                      style: TextStyle(fontSize: 14.sp, color: Colors.white70),
-                    ),
-                    SizedBox(height: 4.h),
-                    Container(
-                      width: 100.w,
-                      height: 4.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white30,
-                        borderRadius: BorderRadius.circular(2.r),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: currentRound / maxRounds,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'AI',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-                    ),
-                    Text(
-                      '$aiScore',
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -496,40 +505,30 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
         children: [
           // AI Choice
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'AI Choice',
-                  style: TextStyle(fontSize: 18.sp, color: Colors.white70),
-                ),
-                SizedBox(height: 16.h),
-                AnimatedBuilder(
-                  animation: _shakeAnimation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(
-                        _shakeAnimation.value *
-                            10 *
-                            sin(_shakeAnimation.value * 10),
-                        0,
-                      ),
-                      child: _buildChoiceDisplay(aiChoice, isAI: true),
-                    );
-                  },
-                ),
-              ],
+            child:   AnimatedBuilder(
+              animation: _shakeAnimation,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(
+                    _shakeAnimation.value *
+                        10 *
+                        sin(_shakeAnimation.value * 10),
+                    0,
+                  ),
+                  child: _buildChoiceDisplay(aiChoice, isAI: true),
+                );
+              },
             ),
           ),
 
           // Result
-          AnimatedBuilder(
+         AnimatedBuilder(
             animation: _resultAnimation,
             builder: (context, child) {
               return Transform.scale(
                 scale: _resultAnimation.value,
                 child: Container(
-                  height: 60.h,
+                  // height: 60.h,
                   child: roundResult != null
                       ? Text(
                           roundResult!,
@@ -547,29 +546,19 @@ class _RockPaperScissorsGameState extends State<RockPaperScissorsGame>
 
           // Player Choice
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Your Choice',
-                  style: TextStyle(fontSize: 18.sp, color: Colors.white70),
-                ),
-                SizedBox(height: 16.h),
-                AnimatedBuilder(
-                  animation: _shakeAnimation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(
-                        _shakeAnimation.value *
-                            10 *
-                            sin(_shakeAnimation.value * 10),
-                        0,
-                      ),
-                      child: _buildChoiceDisplay(playerChoice),
-                    );
-                  },
-                ),
-              ],
+            child:    AnimatedBuilder(
+              animation: _shakeAnimation,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(
+                    _shakeAnimation.value *
+                        10 *
+                        sin(_shakeAnimation.value * 10),
+                    0,
+                  ),
+                  child: _buildChoiceDisplay(playerChoice),
+                );
+              },
             ),
           ),
         ],

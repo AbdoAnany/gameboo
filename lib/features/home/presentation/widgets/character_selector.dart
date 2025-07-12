@@ -103,15 +103,17 @@ class CharacterSelector extends StatelessWidget {
                             height: 64.w,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: isSelected
-                                  ? AppTheme.primaryGradient
-                                  : LinearGradient(
-                                      colors: [
-                                        theme.colorScheme.surface,
-                                        theme.colorScheme.surface.withOpacity(
-                                          0.7,
-                                        ),
-                                      ],
+//                               image: DecorationImage(image: AssetImage(
+//
+// character.imagePath,
+//                               ),fit: BoxFit.cover
+//                               ),
+                              gradient: LinearGradient(
+                                      colors: character.color.map((color) => Color(
+                                        int.parse(color),
+                                      )).toList(),
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                                     ),
                               border: Border.all(
                                 color: isSelected
@@ -121,16 +123,26 @@ class CharacterSelector extends StatelessWidget {
                               ),
                             ),
                             child: Stack(
+                              alignment: Alignment.center,
                               children: [
-                                Center(
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 24.w,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : theme.colorScheme.onSurface,
+
+                                ClipOval(
+                                  child: Image.asset(
+                                    character.imagePath,
+                                    fit: BoxFit.cover,
+                                    width: 64.w,
+                                    height: 64.w,
                                   ),
                                 ),
+                                // Center(
+                                //   child: Icon(
+                                //     Icons.person,
+                                //     size: 24.w,
+                                //     color: isSelected
+                                //         ? Colors.white
+                                //         : theme.colorScheme.onSurface,
+                                //   ),
+                                // ),
                                 if (!character.isUnlocked)
                                   Container(
                                     decoration: BoxDecoration(

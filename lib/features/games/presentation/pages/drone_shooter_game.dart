@@ -72,7 +72,7 @@ class _DroneShooterGamePageState extends State<DroneShooterGamePage> {
     };
   }
 
-  void _handleGameOver() {
+  void _handleGameOver() async{
     if (currentStats == null) return;
 
     final bool won =
@@ -81,10 +81,10 @@ class _DroneShooterGamePageState extends State<DroneShooterGamePage> {
     final xpEarned = _calculateXP(won);
 
     // Add XP to profile first
-    context.read<ProfileCubit>().addXP(xpEarned);
+    await context.read<ProfileCubit>().addXP(xpEarned);
 
     // Then add the activity record
-    context.read<ProfileCubit>().addGameActivity(
+   await context.read<ProfileCubit>().addGameActivity(
       type: won
           ? activity.ActivityType.gameWin
           : activity.ActivityType.gameLoss,

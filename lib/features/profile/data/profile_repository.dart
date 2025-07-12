@@ -21,29 +21,32 @@ class ProfileRepository extends CachedRepository<UserProfile> {
   Future<UserProfile> fetchFromRemote() async {
     // Simulate API call - replace with actual Firebase/API calls
     await Future.delayed(const Duration(milliseconds: 500));
-
-    // Return mock data for now
-    return UserProfile(
+    // Return mock user profile data  from cache
+    UserProfile currentProfile = await getData();
+    if (currentProfile != null) {
+      return currentProfile;
+    }
+     currentProfile = UserProfile(
       id: 'default_user',
-      username: 'GameBoo Player',
-      email: 'player@gameboo.com',
-      avatarUrl: 'assets/images/avatar/default.png',
-      country: 'Unknown',
-      xp: 1250,
-      level: 5,
+      username: 'Player1',
+      coins: 1000,
+      gems: 50,
+      xp: 1,
+      level: 0,
       rank: UserRankType.basic,
-      selectedCharacter: CharacterType.nova,
-      badges: _getDefaultBadges(),
-      gameStats: _getDefaultGameStats(),
-      streak: 3,
-      lastPlayedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-      updatedAt: DateTime.now(),
-      coins: 1500,
-      gems: 75,
-      ownedShopItems: ['power_boost', 'extra_life'],
-      activityHistory: [], // Initialize empty activity history
+      badges:[],
+      gameStats:{},
+      ownedShopItems: [],
+      selectedCharacter: CharacterType.blitz,
+      streak: 0,
+      lastPlayedAt: DateTime.now(),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(), email: 'player@gameboo.com',
     );
+      return currentProfile;
+
+
+
   }
 
   @override
@@ -65,7 +68,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       updatedAt: DateTime.now(),
     );
 
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,1);
   }
 
   /// Update game statistics
@@ -90,7 +93,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       streak: won ? currentProfile.streak + 1 : 0,
     );
 
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,3);
   }
 
   /// Update selected character
@@ -102,7 +105,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       selectedCharacter: characterType,
       updatedAt: DateTime.now(),
     );
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,2);
   }
 
   /// Earn new badge
@@ -120,7 +123,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       updatedAt: DateTime.now(),
     );
 
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,5);
   }
 
   /// Update coins
@@ -130,7 +133,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       coins: (currentProfile.coins + amount).clamp(0, double.maxFinite.toInt()),
       updatedAt: DateTime.now(),
     );
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,4);
   }
 
   /// Update gems
@@ -140,7 +143,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       gems: (currentProfile.gems + amount).clamp(0, double.maxFinite.toInt()),
       updatedAt: DateTime.now(),
     );
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,6);
   }
 
   /// Add shop item to owned items
@@ -157,7 +160,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       updatedAt: DateTime.now(),
     );
 
-    return await updateData(updatedProfile);
+    return await updateData(updatedProfile,6);
   }
 
   /// Calculate level from XP
@@ -195,9 +198,9 @@ class ProfileRepository extends CachedRepository<UserProfile> {
   /// Get default game statistics
   static Map<String, int> _getDefaultGameStats() {
     return {
-      'rock_paper_scissors': 9,
-      'tic_tac_toe': 5,
-      'memory_cards': 3,
+      'rock_paper_scissors': 0,
+      'tic_tac_toe': 0,
+      'memory_cards': 0,
       'shooting_game': 0,
     };
   }

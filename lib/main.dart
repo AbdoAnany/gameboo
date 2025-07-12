@@ -17,7 +17,7 @@ import 'features/profile/presentation/cubit/profile_cubit.dart';
 import 'features/characters/presentation/cubit/character_cubit.dart';
 import 'features/games/presentation/cubit/game_cubit.dart';
 import 'features/games/presentation/pages/rock_paper_scissors_game.dart';
-import 'features/games/presentation/pages/tic_tac_toe_game.dart';
+import 'features/games/presentation/pages/tic_tac_toe/tic_tac_toe_game.dart';
 import 'features/games/presentation/pages/memory_cards_game.dart';
 import 'features/games/domain/entities/game.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
@@ -85,6 +85,7 @@ class GameBooApp extends StatelessWidget {
                 theme: AppTheme.lightTheme,
                 darkTheme: AppTheme.darkTheme,
                 themeMode: themeMode,
+
                 home: const HomePage(),
                 routes: {
                   '/shop': (context) => const ShopPage(),

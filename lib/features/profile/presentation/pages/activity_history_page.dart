@@ -9,7 +9,7 @@ import '../../domain/entities/game_activity.dart';
 import '../../domain/entities/user_profile.dart';
 
 class ActivityHistoryPage extends StatelessWidget {
-  const ActivityHistoryPage({Key? key}) : super(key: key);
+  const ActivityHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -101,20 +101,20 @@ class ActivityHistoryPage extends StatelessWidget {
                               Icon(
                                 Icons.history,
                                 size: 64.sp,
-                                color: Colors.white.withOpacity(0.5),
+                                // color: Colors.white.withOpacity(0.5),
                               ),
                               SizedBox(height: 16.h),
                               Text(
                                 'No activities yet',
                                 style: theme.textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white.withOpacity(0.7),
+
                                 ),
                               ),
                               SizedBox(height: 8.h),
                               Text(
                                 'Start playing games to see your history!',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.5),
+                                  // color: Colors.white.withOpacity(0.5),
                                 ),
                                 textAlign: TextAlign.center,
                               ),

@@ -266,7 +266,7 @@ class _ShopPageState extends State<ShopPage> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12.w,
                 mainAxisSpacing: 12.h,
-                childAspectRatio: 0.75,
+                childAspectRatio: 0.8,
               ),
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
@@ -421,13 +421,14 @@ class _ShopPageState extends State<ShopPage> {
                         color: _getCurrencyColor(item.currencyType),
                       ),
                       SizedBox(width: 4.w),
-                      Text(
+                 Text(
                         item.price.toString(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: 10.sp,
                           color: _getCurrencyColor(item.currencyType),
-                        ),
-                      ),
+
+                      )),
                     ],
                   ),
                   SizedBox(
@@ -439,7 +440,7 @@ class _ShopPageState extends State<ShopPage> {
                           ? () {
                               context.read<ShopCubit>().purchaseItem(
                                 item,
-                                userXP,
+                                userXP,context
                               );
                               // Handle currency deduction based on type
                               switch (item.currencyType) {

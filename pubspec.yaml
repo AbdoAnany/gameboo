@@ -2,7 +2,7 @@ name: gameboo
 description: "Gameboo - A gamified mobile application with multiple mini-games, glassmorphism theme, and character system."
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.8.0
@@ -57,14 +57,14 @@ dependencies:
 
   # UI Components
   flutter_svg: ^2.0.9
-  google_fonts: ^6.1.0
+  google_fonts: ^6.2.1
   flutter_screenutil: ^5.9.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.0
 
 flutter_icons:

@@ -497,8 +497,12 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
                   child: SlideAnimation(
                     verticalOffset: -50.0,
                     child: FadeInAnimation(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.w),
+                      child: GlassContainer(
+                        margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0.h),
+                        blur: 1,
+                        opacity: .0,
+
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                         child: Row(
                           children: [
                             IconButton(
@@ -562,7 +566,7 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
                     ),
                   ),
                 ),
-
+SizedBox( height: 8.h),
                 // Game Stats
                 AnimationConfiguration.staggeredList(
                   position: 1,
@@ -609,8 +613,9 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
                     verticalOffset: 50.0,
                     child: FadeInAnimation(
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        padding: EdgeInsets.symmetric(horizontal: 0,vertical: 16.h),
                         child: GlassCard(
+                          padding:  EdgeInsets.symmetric(horizontal: 32.w,vertical: 16.h),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -679,7 +684,6 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
                   ),
                 ),
 
-                SizedBox(height: 20.h),
 
                 // Game Board
                 Expanded(
@@ -690,17 +694,17 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
                       verticalOffset: 50.0,
                       child: FadeInAnimation(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20.w),
+                          padding: EdgeInsets.symmetric(horizontal: 0.w),
                           child: GlassCard(
                             child: Padding(
-                              padding: EdgeInsets.all(16.w),
+                              padding: EdgeInsets.all(0.w),
                               child: GridView.builder(
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: _getColumnCount(),
                                       crossAxisSpacing: 8.w,
                                       mainAxisSpacing: 8.h,
-                                      childAspectRatio: 1.0,
+                                      // childAspectRatio:1.4,
                                     ),
                                 itemCount: cards.length,
                                 itemBuilder: (context, index) {
@@ -717,48 +721,47 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
 
                 // Control Buttons
                 AnimationConfiguration.staggeredList(
-                  position: 4,
-                  duration: const Duration(milliseconds: 375),
-                  child: SlideAnimation(
-                    verticalOffset: 50.0,
-                    child: FadeInAnimation(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.w),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.1,
-                                  ),
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12.r),
-                                    side: BorderSide(
-                                      color: Colors.white.withOpacity(0.2),
-                                      width: 1,
+                    position: 3,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                        verticalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20.w,vertical: 8.h),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white.withOpacity(
+                                        0.1,
+                                      ),
+                                      foregroundColor: Colors.white,
+                                      padding: EdgeInsets.symmetric(vertical: 0.h),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        side: BorderSide(
+                                          color: Colors.white.withOpacity(0.2),
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    onPressed: _startGame,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.refresh, size: 20.sp),
+                                        SizedBox(width: 8.w),
+                                        Text('New Game'),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                onPressed: _startGame,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.refresh, size: 20.sp),
-                                    SizedBox(width: 8.w),
-                                    Text('New Game'),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                          ),
+                        )))
+
               ],
             ),
           ),
@@ -770,11 +773,11 @@ class _MemoryCardsGameState extends State<MemoryCardsGame>
   int _getColumnCount() {
     switch (selectedDifficulty) {
       case GameDifficulty.easy:
-        return 3;
-      case GameDifficulty.medium:
         return 4;
-      case GameDifficulty.hard:
+      case GameDifficulty.medium:
         return 5;
+      case GameDifficulty.hard:
+        return 6;
       case GameDifficulty.expert:
         return 6;
     }

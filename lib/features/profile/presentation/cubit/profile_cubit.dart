@@ -37,31 +37,45 @@ class ProfileError extends ProfileState {
 
 // Profile Cubit
 class ProfileCubit extends Cubit<ProfileState> {
-  final ProfileRepository _profileRepository = ProfileRepository();
+  // singletoon
 
-  ProfileCubit() : super(ProfileInitial()) {
-    _loadProfile();
+  ProfileCubit.singleton() : super(ProfileInitial());
+  static final ProfileCubit _instance = ProfileCubit.singleton();
+  factory ProfileCubit() {
+    _instance._loadProfile();
+    return _instance;
   }
+  final ProfileRepository _profileRepository = ProfileRepository();
 
   Future<void> _loadProfile() async {
     emit(ProfileLoading());
-
+    print('🔄 ____Loading profile data...');
     try {
       final profile = await _profileRepository.getData();
+
+      print('profile loaded: ${profile.activityHistory.length}');
+
+      emit(ProfileLoaded(profile));
+    } catch (e) {
+
+      emit(ProfileError('Failed to load profile: $e'));
+    }
+  }
+
+  Future<void> loadProfile() async {
+    emit(ProfileLoading());
+    print('🔄 Loading profile999 data...');
+    try {
+      final profile = await _profileRepository.getData();
+      print('profile activityHistory: ${profile.activityHistory.length}');
+      print('profile toJson: ${profile.toJson()}');
+
       emit(ProfileLoaded(profile));
     } catch (e) {
       emit(ProfileError('Failed to load profile: $e'));
     }
   }
 
-  Future<void> updateProfile(UserProfile profile) async {
-    try {
-      final updatedProfile = await _profileRepository.updateData(profile);
-      emit(ProfileLoaded(updatedProfile));
-    } catch (e) {
-      emit(ProfileError('Failed to update profile: $e'));
-    }
-  }
 
   Future<void> addXP(int xp) async {
     if (state is ProfileLoaded) {
@@ -82,8 +96,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           selectedCharacter: character,
           updatedAt: DateTime.now(),
         );
-        final savedProfile = await _profileRepository.updateData(
-          updatedProfile,
+        final savedProfile = await _profileRepository.updateData(updatedProfile,8
         );
         emit(ProfileLoaded(savedProfile));
       } catch (e) {
@@ -227,6 +240,8 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (state is ProfileLoaded) {
       try {
         final currentProfile = (state as ProfileLoaded).profile;
+        print('currentProfile  xp ${currentProfile.xp.toString()}');
+
         final activity = GameActivity(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           type: type,
@@ -249,17 +264,31 @@ class ProfileCubit extends Cubit<ProfileState> {
 
         final updatedActivities = [activity, ...currentProfile.activityHistory];
         // Keep only the last 100 activities to prevent unlimited growth
-        final limitedActivities = updatedActivities.take(100).toList();
+        print('updatedActivities length: ${updatedActivities.length}');
 
+        final limitedActivities = updatedActivities.take(100).toList();
+print('limitedActivities length: ${limitedActivities.length}');
         final updatedProfile = currentProfile.copyWith(
           activityHistory: limitedActivities,
+          xp: currentProfile.xp + xpEarned,
+          lastPlayedAt: DateTime.now(),
+
+
+
+
+          streak: type == ActivityType.gameWin ? currentProfile.streak + 1 : 0,
+
+          coins: currentProfile.coins + (xpEarned * 5),
+
           updatedAt: DateTime.now(),
         );
 
         print('💾 Saving profile with ${limitedActivities.length} activities');
         final savedProfile = await _profileRepository.updateData(
-          updatedProfile,
+          updatedProfile,10
         );
+        print('updatedProfile  xp ${savedProfile.xp.toString()}');
+        print('activityHistory  xp ${savedProfile.activityHistory.length.toString()}');
         emit(ProfileLoaded(savedProfile));
         print(
           '✅ Activity successfully saved! Total activities: ${savedProfile.activityHistory.length}',
@@ -336,7 +365,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         );
 
         final savedProfile = await _profileRepository.updateData(
-          updatedProfile,
+          updatedProfile,9
         );
         emit(ProfileLoaded(savedProfile));
       } catch (e) {

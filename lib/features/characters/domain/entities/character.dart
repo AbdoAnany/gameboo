@@ -151,7 +151,7 @@ class CharacterRepository {
       type: CharacterType.nova,
       name: 'Mike',
       description: 'A futuristic pilot with exceptional focus and precision',
-      imagePath: 'assets/images/logo.png', // Temporary placeholder
+      imagePath: 'assets/images/characters/mike.png', // Temporary placeholder
       specialty: 'Drone flying & high focus games',
       color: ['0xFF42999B', "0xff53E6F2"],
       abilities: {'focus_boost': 1.2, 'drone_control': 1.5, 'precision': 1.3},
@@ -165,9 +165,9 @@ class CharacterRepository {
     Character(
       type: CharacterType.blitz,
       name: 'Scary',
-      color: ['0xFF4299B', "oxff53E6F2"],
+      color: ['0xFF4299B', "0xff53E6F2"],
       description: 'A cool racer with lightning-fast reflexes',
-      imagePath: 'assets/images/logo.png', // Temporary placeholder
+      imagePath:  'assets/images/characters/scary.png', // Temporary placeholder
       specialty: 'Racing & reflex-based games',
       abilities: {'speed_boost': 1.3, 'reflex_time': 1.4, 'racing_bonus': 1.5},
       unlockRequirement: CharacterUnlockRequirement(
@@ -179,9 +179,9 @@ class CharacterRepository {
     Character(
       type: CharacterType.zink,
       name: 'Slimy',
-      color: ['0xFFD77927', "oxffEA9E3D"],
+      color: ['0xFFD77927', "0xffEA9E3D"],
       description: 'A brilliant robot with advanced problem-solving algorithms',
-      imagePath: 'assets/images/logo.png', // Temporary placeholder
+      imagePath:  'assets/images/characters/slimy.png', // Temporary placeholder
       specialty: 'Puzzle-solving master',
       abilities: {
         'logic_boost': 1.4,
@@ -197,9 +197,9 @@ class CharacterRepository {
     Character(
       type: CharacterType.karma,
       name: 'Trolls',
-      color: ['0xFFCD2C24', "oxffE252529"],
+      color: ['0xFFCD2C24', "0xffE252529"],
       description: 'A mystical card master with magical powers',
-      imagePath: 'assets/images/logo.png', // Temporary placeholder
+      imagePath: 'assets/images/characters/trolls.png', // Temporary placeholder
       specialty: 'Card shooting & magical games',
       abilities: {'card_power': 1.5, 'magic_boost': 1.3, 'accuracy': 1.4},
       unlockRequirement: CharacterUnlockRequirement(
@@ -208,24 +208,7 @@ class CharacterRepository {
         description: 'Collect 5 badges',
       ),
     ),
-    Character(
-      type: CharacterType.rokk,
-      name: 'Trolls',
-      color: ['0xFFCD2C24', "oxffE252529"],
-      description: 'A powerful destroyer with incredible strength',
-      imagePath: 'assets/images/logo.png', // Temporary placeholder
-      specialty: 'Ball games & destruction',
-      abilities: {
-        'strength_boost': 1.5,
-        'destruction_power': 1.6,
-        'ball_control': 1.3,
-      },
-      unlockRequirement: CharacterUnlockRequirement(
-        type: CharacterUnlockType.wins,
-        value: 10,
-        description: 'Win 10 games',
-      ),
-    ),
+
   ];
 
   static Character getCharacterByType(CharacterType type) {

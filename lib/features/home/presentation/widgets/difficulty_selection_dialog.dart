@@ -75,7 +75,7 @@ class DifficultySelectionDialog extends StatelessWidget {
           ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               difficulty.name.toUpperCase(),
@@ -103,11 +103,11 @@ class DifficultySelectionDialog extends StatelessWidget {
 
   IconData _getDifficultyIcon(GameDifficulty difficulty) {
     switch (difficulty) {
-      case GameDifficulty.easy:
+      case GameDifficulty. hard :
         return Icons.star;
       case GameDifficulty.medium:
         return Icons.star_half;
-      case GameDifficulty.hard:
+      case GameDifficulty.easy:
         return Icons.star_border;
       case GameDifficulty.expert:
         return Icons.whatshot;
