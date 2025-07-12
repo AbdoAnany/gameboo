@@ -189,9 +189,7 @@ class ProfileHeader extends StatelessWidget {
       height: 50.w,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        image: DecorationImage(image: 
-          AssetImage(  getBadgeAsset(rank),)
-        ),
+        image: DecorationImage(image: AssetImage(getBadgeAsset(rank))),
         // gradient: AppTheme.primaryGradient,
       ),
       // child: Icon(Icons.person, size: 25.w, color: Colors.white),
