@@ -1,4 +1,4 @@
-# GameX - Flutter Mobile Game App
+# GameBoo - Flutter Mobile Game App
 
 A comprehensive gamified mobile application featuring multiple mini-games, character system, and glassmorphism UI design.
 
