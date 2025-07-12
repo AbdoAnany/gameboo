@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'features/games/presentation/pages/ball_blaster_game.dart';
+import 'features/games/presentation/pages/car_racing_game.dart';
+import 'features/games/presentation/pages/puzzle_mania_game.dart';
+import 'features/games/presentation/pages/drone_flight_game.dart';
+import 'features/games/presentation/pages/drone_shooter_game.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -18,6 +22,7 @@ import 'features/games/presentation/pages/memory_cards_game.dart';
 import 'features/games/domain/entities/game.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/shop/presentation/cubit/shop_cubit.dart';
+import 'features/shop/presentation/pages/shop_page.dart';
 import 'features/progression/presentation/cubit/progression_cubit.dart';
 import 'firebase_options.dart';
 
@@ -82,6 +87,7 @@ class GameBooApp extends StatelessWidget {
                 themeMode: themeMode,
                 home: const HomePage(),
                 routes: {
+                  '/shop': (context) => const ShopPage(),
                   '/rock-paper-scissors': (context) {
                     final difficulty =
                         ModalRoute.of(context)!.settings.arguments
@@ -105,6 +111,30 @@ class GameBooApp extends StatelessWidget {
                         ModalRoute.of(context)!.settings.arguments
                             as GameDifficulty;
                     return BallBlasterGame(difficulty: difficulty);
+                  },
+                  '/car-racing': (context) {
+                    final difficulty =
+                        ModalRoute.of(context)!.settings.arguments
+                            as GameDifficulty;
+                    return CarRacingGame(difficulty: difficulty);
+                  },
+                  '/puzzle-mania': (context) {
+                    final difficulty =
+                        ModalRoute.of(context)!.settings.arguments
+                            as GameDifficulty;
+                    return PuzzleManiaGame(difficulty: difficulty);
+                  },
+                  '/drone-flight': (context) {
+                    final difficulty =
+                        ModalRoute.of(context)!.settings.arguments
+                            as GameDifficulty;
+                    return DroneFlightGame(difficulty: difficulty);
+                  },
+                  '/drone-shooter': (context) {
+                    final difficulty =
+                        ModalRoute.of(context)!.settings.arguments
+                            as GameDifficulty;
+                    return DroneShooterGamePage(difficulty: difficulty);
                   },
                 },
               );

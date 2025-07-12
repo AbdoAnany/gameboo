@@ -1,5 +1,5 @@
 name: gameboo
-description: "GameX - A gamified mobile application with multiple mini-games, glassmorphism theme, and character system."
+description: "Gameboo - A gamified mobile application with multiple mini-games, glassmorphism theme, and character system."
 publish_to: "none"
 
 version: 1.0.0+1
@@ -63,23 +63,30 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#e0e7ef"
+  adaptive_icon_foreground: "assets/logo.png"
 
-# The following section is specific to Flutter packages.
+flutter_native_splash:
+  color: "#e0e7ef"
+  image: assets/logo.png
+  android: true
+  ios: true
+  web: false
+
 flutter:
   uses-material-design: true
-
   assets:
+    - assets/logo.png
     - assets/images/
+    - assets/images/badge/
     - assets/images/characters/
     - assets/images/games/
     - assets/images/shop/

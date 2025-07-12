@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '/features/progression/domain/entities/progression.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/glass_widgets.dart';
 import '../../../profile/domain/entities/user_profile.dart';
@@ -17,28 +18,25 @@ class DailyChallenges extends StatelessWidget {
         id: '1',
         title: 'Card Master',
         description: 'Score 1000 points in Card Shooter',
-        gameType: 'cardShooter',
-        requirements: {'score': 1000},
+        targetScore: 1000,
         xpReward: 50,
-        date: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(days: 1)),
       ),
       DailyChallenge(
         id: '2',
         title: 'Speed Demon',
         description: 'Complete Racing Rush in under 2 minutes',
-        gameType: 'racingRush',
-        requirements: {'time': 120},
+        targetScore: 120,
         xpReward: 75,
-        date: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(days: 1)),
       ),
       DailyChallenge(
         id: '3',
         title: 'Puzzle Solver',
         description: 'Complete 5 puzzles in Puzzle Mania',
-        gameType: 'puzzleMania',
-        requirements: {'puzzles': 5},
+        targetScore: 5,
         xpReward: 60,
-        date: DateTime.now(),
+        expiresAt: DateTime.now().add(const Duration(days: 1)),
       ),
     ];
 
@@ -141,7 +139,9 @@ class _ChallengeItem extends StatelessWidget {
               gradient: AppTheme.primaryGradient,
             ),
             child: Icon(
-              _getChallengeIcon(challenge.gameType),
+              _getChallengeIcon(
+                challenge.title,
+              ), // Updated to use title instead
               size: 20.w,
               color: Colors.white,
             ),

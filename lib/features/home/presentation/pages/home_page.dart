@@ -388,6 +388,18 @@ class GamesPageContent extends StatelessWidget {
       case GameType.ballBlaster:
         Navigator.pushNamed(context, '/ball-blaster', arguments: difficulty);
         break;
+      case GameType.carRacing:
+        Navigator.pushNamed(context, '/car-racing', arguments: difficulty);
+        break;
+      case GameType.droneFlight:
+        Navigator.pushNamed(context, '/drone-flight', arguments: difficulty);
+        break;
+      case GameType.puzzleMania:
+        Navigator.pushNamed(context, '/puzzle-mania', arguments: difficulty);
+        break;
+      case GameType.droneShooter:
+        Navigator.pushNamed(context, '/drone-shooter', arguments: difficulty);
+        break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -503,6 +515,191 @@ class _ProfilePage extends StatelessWidget {
                               ),
                             ],
                           ),
+                          SizedBox(height: 16.h),
+                          // Wallet Info
+                          Container(
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.monetization_on,
+                                      color: Colors.amber,
+                                      size: 20.w,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      '${state.profile.coins}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: Colors.amber,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  width: 1,
+                                  height: 20.h,
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.diamond,
+                                      color: Colors.purple,
+                                      size: 20.w,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      '${state.profile.gems}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: Colors.purple,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    // Inventory Section
+                    GlassCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Inventory',
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          SizedBox(height: 16.h),
+                          Container(
+                            height: 120.h,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                            ),
+                            child: state.profile.ownedShopItems.isEmpty
+                                ? Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.inventory_2_outlined,
+                                          color: Colors.white.withOpacity(0.5),
+                                          size: 32.w,
+                                        ),
+                                        SizedBox(height: 8.h),
+                                        Text(
+                                          'No items yet',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: Colors.white.withOpacity(
+                                                  0.6,
+                                                ),
+                                              ),
+                                        ),
+                                        SizedBox(height: 4.h),
+                                        Text(
+                                          'Visit the shop to get items!',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Colors.white.withOpacity(
+                                                  0.4,
+                                                ),
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: EdgeInsets.all(12.w),
+                                    child: GridView.builder(
+                                      physics: NeverScrollableScrollPhysics(),
+                                      gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 4,
+                                            crossAxisSpacing: 8.w,
+                                            mainAxisSpacing: 8.h,
+                                            childAspectRatio: 1,
+                                          ),
+                                      itemCount:
+                                          state.profile.ownedShopItems.length,
+                                      itemBuilder: (context, index) {
+                                        final item =
+                                            state.profile.ownedShopItems[index];
+                                        return Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(
+                                              0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              8.r,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.white.withOpacity(
+                                                0.3,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 20.w,
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                item.length > 6
+                                                    ? '${item.substring(0, 6)}...'
+                                                    : item,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodySmall
+                                                    ?.copyWith(
+                                                      color: Colors.white,
+                                                      fontSize: 8.sp,
+                                                    ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                          ),
                         ],
                       ),
                     ),
@@ -516,6 +713,13 @@ class _ProfilePage extends StatelessWidget {
                             style: Theme.of(context).textTheme.headlineMedium,
                           ),
                           SizedBox(height: 16.h),
+                          _SettingsItem(
+                            icon: Icons.shopping_bag,
+                            title: 'Shop',
+                            onTap: () {
+                              Navigator.pushNamed(context, '/shop');
+                            },
+                          ),
                           _SettingsItem(
                             icon: Icons.notifications_outlined,
                             title: 'Notifications',

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gameboo/features/characters/presentation/widget/character_card.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../shared/widgets/glass_widgets.dart';
+import '/features/characters/presentation/widget/character_card.dart';
+import '/core/theme/app_theme.dart';
+import '/shared/widgets/glass_widgets.dart';
 import '../cubit/character_cubit.dart';
 import '../../domain/entities/character.dart';
 import 'character_detail_page.dart';

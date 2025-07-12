@@ -31,7 +31,7 @@ class ProfileRepository extends CachedRepository<UserProfile> {
       country: 'Unknown',
       xp: 1250,
       level: 5,
-      rank: 'Silver',
+      rank: UserRankType.basic,
       selectedCharacter: CharacterType.nova,
       badges: _getDefaultBadges(),
       gameStats: _getDefaultGameStats(),

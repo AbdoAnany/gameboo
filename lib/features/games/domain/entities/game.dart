@@ -9,7 +9,9 @@ enum GameType {
   droneFlight,
   mcqQuiz,
   ballBlaster,
+  puzzleMania,
   towerBuilding,
+  droneShooter,
 }
 
 enum GameDifficulty { easy, medium, hard, expert }
@@ -424,19 +426,38 @@ class GameRepository {
       unlockLevel: 6,
     ),
     GameMetadata(
-      type: GameType.towerBuilding,
-      name: 'Tower Building',
-      description: 'Stack blocks to build the highest tower possible',
-      thumbnailPath: 'assets/images/games/tower_building_thumb.png',
-      iconPath: 'assets/images/games/tower_building_icon.png',
+      type: GameType.puzzleMania,
+      name: 'Puzzle Mania',
+      description: 'Classic logic puzzles including match-3 and tile swap',
+      thumbnailPath: 'assets/images/games/puzzle_mania_thumb.png',
+      iconPath: 'assets/images/games/puzzle_mania_icon.png',
       availableDifficulties: [
         GameDifficulty.easy,
         GameDifficulty.medium,
         GameDifficulty.hard,
         GameDifficulty.expert,
       ],
-      gameSettings: {'maxBlocks': 20, 'swayIntensity': 1.0, 'gravity': 9.8},
+      gameSettings: {'gridSize': 8, 'targetScore': 150, 'timeLimit': 180},
       unlockLevel: 7,
+    ),
+    GameMetadata(
+      type: GameType.droneShooter,
+      name: 'Drone Shooter',
+      description: 'Side-scrolling shooter game with upgrades and power-ups',
+      thumbnailPath: 'assets/images/games/drone_shooter_thumb.png',
+      iconPath: 'assets/images/games/drone_shooter_icon.png',
+      availableDifficulties: [
+        GameDifficulty.easy,
+        GameDifficulty.medium,
+        GameDifficulty.hard,
+        GameDifficulty.expert,
+      ],
+      gameSettings: {
+        'enemySpawnRate': 2.0,
+        'droneSpeed': 200,
+        'maxHealth': 100,
+      },
+      unlockLevel: 8,
     ),
   ];
 

@@ -22,6 +22,7 @@ enum GameType {
   racingRush,
   droneFlight,
   puzzleMania,
+  droneShooter,
 }
 
 class GameActivity extends Equatable {
@@ -161,6 +162,8 @@ class ActivityHelper {
         return 'Drone Flight';
       case GameType.puzzleMania:
         return 'Puzzle Mania';
+      case GameType.droneShooter:
+        return 'Drone Shooter';
     }
   }
 

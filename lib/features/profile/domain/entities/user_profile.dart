@@ -1,7 +1,61 @@
+// xp_utils.dart
 import 'package:equatable/equatable.dart';
-import '../../../characters/domain/entities/character.dart';
-import 'game_activity.dart';
 
+import '/features/characters/domain/entities/character.dart';
+import '/features/profile/domain/entities/game_activity.dart';
+
+int calculateLevelXP(int level) {
+  if (level <= 1) return 1000;
+  int xp = 1000;
+  for (int i = 2; i <= level; i++) {
+    xp += 1000 + (i - 1) * 200;
+  }
+  return xp;
+}
+
+int xpRequiredForLevel(int level) {
+  return calculateLevelXP(level) - calculateLevelXP(level - 1);
+}
+
+double calculateLevelProgress(int xp, int level) {
+  final prevXP = calculateLevelXP(level - 1);
+  final nextXP = calculateLevelXP(level);
+  return (xp - prevXP) / (nextXP - prevXP);
+}
+
+class LevelProgressModel {
+  final int currentLevel;
+  final int totalXP;
+  final int previousLevelXP;
+  final int nextLevelXP;
+  final double progressPercent;
+
+  LevelProgressModel({
+    required this.currentLevel,
+    required this.totalXP,
+    required this.previousLevelXP,
+    required this.nextLevelXP,
+    required this.progressPercent,
+  });
+
+  factory LevelProgressModel.fromXP(int xp, int level) {
+    final previousXP = calculateLevelXP(level - 1);
+    final nextXP = calculateLevelXP(level);
+    final progress = ((xp - previousXP) / (nextXP - previousXP))
+        .clamp(0, 1)
+        .toDouble();
+
+    return LevelProgressModel(
+      currentLevel: level,
+      totalXP: xp,
+      previousLevelXP: previousXP,
+      nextLevelXP: nextXP,
+      progressPercent: progress,
+    );
+  }
+}
+
+// badge.dart
 enum BadgeType { bronze, silver, gold, diamond }
 
 enum BadgeCategory { games, social, achievements, special }
@@ -53,20 +107,6 @@ class Badge extends Equatable {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'imagePath': imagePath,
-      'type': type.name,
-      'category': category.name,
-      'xpReward': xpReward,
-      'isEarned': isEarned,
-      'earnedAt': earnedAt?.millisecondsSinceEpoch,
-    };
-  }
-
   factory Badge.fromJson(Map<String, dynamic> json) {
     return Badge(
       id: json['id'] ?? '',
@@ -89,6 +129,18 @@ class Badge extends Equatable {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'description': description,
+    'imagePath': imagePath,
+    'type': type.name,
+    'category': category.name,
+    'xpReward': xpReward,
+    'isEarned': isEarned,
+    'earnedAt': earnedAt?.millisecondsSinceEpoch,
+  };
+
   @override
   List<Object?> get props => [
     id,
@@ -103,14 +155,30 @@ class Badge extends Equatable {
   ];
 }
 
+// Enum to map badge assets
+enum UserRankType { basic, advance, pro, premium }
+
+String getBadgeAsset(UserRankType type) {
+  switch (type) {
+    case UserRankType.basic:
+      return 'assets/images/badge/level-basic.png';
+    case UserRankType.advance:
+      return 'assets/images/badge/level-advance.png';
+    case UserRankType.pro:
+      return 'assets/images/badge/level-pro.png';
+    case UserRankType.premium:
+      return 'assets/images/badge/level-premium.png';
+  }
+}
+
+// user_profile.dart
 class UserProfile extends Equatable {
   final String id;
   final String username;
   final String email;
   final String? avatarUrl;
   final String? country;
-  final String? rank;
-
+  final UserRankType rank;
   final int xp;
   final int level;
   final CharacterType selectedCharacter;
@@ -120,13 +188,9 @@ class UserProfile extends Equatable {
   final DateTime? lastPlayedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
-
-  // Shop/Wallet related fields
   final int coins;
   final int gems;
   final List<String> ownedShopItems;
-
-  // Activity History
   final List<GameActivity> activityHistory;
 
   const UserProfile({
@@ -135,7 +199,7 @@ class UserProfile extends Equatable {
     required this.email,
     this.avatarUrl,
     this.country,
-    this.rank = 'Bronze',
+    this.rank = UserRankType.basic,
     this.xp = 0,
     this.level = 1,
     this.selectedCharacter = CharacterType.nova,
@@ -151,47 +215,21 @@ class UserProfile extends Equatable {
     this.activityHistory = const [],
   });
 
-  // Progressive XP calculation: Level 1 = 1000 XP, Level 2 = 2200 XP, Level 3 = 3600 XP, etc.
-  int get xpForCurrentLevel {
-    if (level <= 1) return 0;
-    return (level - 1) * 1000 + ((level - 2).clamp(0, level - 2)) * 200;
-  }
+  double get levelProgress => calculateLevelProgress(xp, level);
+  int get xpToNextLevel => calculateLevelXP(level + 1) - xp;
+  int get xpForCurrentLevel => xpRequiredForLevel(level);
+  int get totalWins => gameStats.values.fold(0, (sum, e) => sum + e);
+  List<Badge> get earnedBadges => badges.where((e) => e.isEarned).toList();
+  LevelProgressModel get progressModel => LevelProgressModel.fromXP(xp, level);
 
-  int get xpForNextLevel {
-    return (level * 1000) + ((level - 1) * 200);
-  }
-
-  int get xpToNextLevel {
-    return xpForNextLevel - xp;
-  }
-
-  double get levelProgress {
-    final prevLevelXP = _calculateLevelXP(level - 1);
-    final thisLevelXP = _calculateLevelXP(level);
-    return (xp - prevLevelXP) / (thisLevelXP - prevLevelXP);
-  }
-
-  // Helper for progressive XP
-  int _calculateLevelXP(int level) {
-    if (level <= 1) return 0;
-    return (level * 1000) + ((level - 1) * 200);
-  }
-
-  int get totalWins {
-    return gameStats.values.fold(0, (sum, wins) => sum + wins);
-  }
-
-  List<Badge> get earnedBadges {
-    return badges.where((badge) => badge.isEarned).toList();
-  }
-
+  //copyWith
   UserProfile copyWith({
     String? id,
     String? username,
     String? email,
     String? avatarUrl,
     String? country,
-    String? rank,
+    UserRankType? rank,
     int? xp,
     int? level,
     CharacterType? selectedCharacter,
@@ -229,69 +267,6 @@ class UserProfile extends Equatable {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'email': email,
-      'avatarUrl': avatarUrl,
-      'country': country,
-      'xp': xp,
-      'level': level,
-      'rank': rank,
-      'selectedCharacter': selectedCharacter.name,
-      'badges': badges.map((badge) => badge.toJson()).toList(),
-      'gameStats': gameStats,
-      'streak': streak,
-      'lastPlayedAt': lastPlayedAt?.millisecondsSinceEpoch,
-      'createdAt': createdAt.millisecondsSinceEpoch,
-      'updatedAt': updatedAt.millisecondsSinceEpoch,
-      'coins': coins,
-      'gems': gems,
-      'ownedShopItems': ownedShopItems,
-      'activityHistory': activityHistory
-          .map((activity) => activity.toJson())
-          .toList(),
-    };
-  }
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
-      id: json['id'] ?? '',
-      username: json['username'] ?? '',
-      email: json['email'] ?? '',
-      avatarUrl: json['avatarUrl'],
-      country: json['country'],
-      xp: json['xp'] ?? 0,
-      rank: json['rank'],
-      level: json['level'] ?? 1,
-      selectedCharacter: CharacterType.values.firstWhere(
-        (e) => e.name == json['selectedCharacter'],
-        orElse: () => CharacterType.nova,
-      ),
-      badges: (json['badges'] as List<dynamic>? ?? [])
-          .map((badgeJson) => Badge.fromJson(badgeJson))
-          .toList(),
-      gameStats: Map<String, int>.from(json['gameStats'] ?? {}),
-      streak: json['streak'] ?? 0,
-      lastPlayedAt: json['lastPlayedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['lastPlayedAt'])
-          : null,
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        json['createdAt'] ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      updatedAt: DateTime.fromMillisecondsSinceEpoch(
-        json['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      coins: json['coins'] ?? 1000,
-      gems: json['gems'] ?? 50,
-      ownedShopItems: List<String>.from(json['ownedShopItems'] ?? []),
-      activityHistory: (json['activityHistory'] as List<dynamic>? ?? [])
-          .map((activityJson) => GameActivity.fromJson(activityJson))
-          .toList(),
-    );
-  }
-
   @override
   List<Object?> get props => [
     id,
@@ -314,97 +289,68 @@ class UserProfile extends Equatable {
     ownedShopItems,
     activityHistory,
   ];
-}
-
-class DailyChallenge extends Equatable {
-  final String id;
-  final String title;
-  final String description;
-  final String gameType;
-  final Map<String, dynamic> requirements;
-  final int xpReward;
-  final bool isCompleted;
-  final DateTime date;
-  final DateTime? completedAt;
-
-  const DailyChallenge({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.gameType,
-    required this.requirements,
-    required this.xpReward,
-    this.isCompleted = false,
-    required this.date,
-    this.completedAt,
-  });
-
-  DailyChallenge copyWith({
-    String? id,
-    String? title,
-    String? description,
-    String? gameType,
-    Map<String, dynamic>? requirements,
-    int? xpReward,
-    bool? isCompleted,
-    DateTime? date,
-    DateTime? completedAt,
-  }) {
-    return DailyChallenge(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      description: description ?? this.description,
-      gameType: gameType ?? this.gameType,
-      requirements: requirements ?? this.requirements,
-      xpReward: xpReward ?? this.xpReward,
-      isCompleted: isCompleted ?? this.isCompleted,
-      date: date ?? this.date,
-      completedAt: completedAt ?? this.completedAt,
+  //fromJson
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      id: json['id'] ?? '',
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      avatarUrl: json['avatarUrl'],
+      country: json['country'],
+      rank: UserRankType.values.firstWhere(
+        (e) => e.name == json['rank'],
+        orElse: () => UserRankType.basic,
+      ),
+      xp: json['xp'] ?? 0,
+      level: json['level'] ?? 1,
+      selectedCharacter: CharacterType.values.firstWhere(
+        (e) => e.name == json['selectedCharacter'],
+        orElse: () => CharacterType.nova,
+      ),
+      badges:
+          (json['badges'] as List<dynamic>?)
+              ?.map((e) => Badge.fromJson(Map<String, dynamic>.from(e)))
+              .toList() ??
+          [],
+      gameStats: Map<String, int>.from(json['gameStats'] ?? {}),
+      streak: json['streak'] ?? 0,
+      lastPlayedAt: json['lastPlayedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastPlayedAt'])
+          : null,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(json['createdAt']),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(json['updatedAt']),
+      coins: json['coins'] ?? 1000,
+      gems: json['gems'] ?? 50,
+      ownedShopItems: List<String>.from(json['ownedShopItems'] ?? const []),
+      activityHistory:
+          (json['activityHistory'] as List<dynamic>?)
+              ?.map((e) => GameActivity.fromJson(Map<String, dynamic>.from(e)))
+              .toList() ??
+          [],
     );
   }
-
+  // toJson
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title': title,
-      'description': description,
-      'gameType': gameType,
-      'requirements': requirements,
-      'xpReward': xpReward,
-      'isCompleted': isCompleted,
-      'date': date.millisecondsSinceEpoch,
-      'completedAt': completedAt?.millisecondsSinceEpoch,
+      'username': username,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'country': country,
+      'rank': rank.name,
+      'xp': xp,
+      'level': level,
+      'selectedCharacter': selectedCharacter.name,
+      'badges': badges.map((e) => e.toJson()).toList(),
+      'gameStats': gameStats,
+      'streak': streak,
+      'lastPlayedAt': lastPlayedAt?.millisecondsSinceEpoch,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+      'updatedAt': updatedAt.millisecondsSinceEpoch,
+      'coins': coins,
+      'gems': gems,
+      'ownedShopItems': ownedShopItems,
+      'activityHistory': activityHistory.map((e) => e.toJson()).toList(),
     };
   }
-
-  factory DailyChallenge.fromJson(Map<String, dynamic> json) {
-    return DailyChallenge(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      gameType: json['gameType'] ?? '',
-      requirements: Map<String, dynamic>.from(json['requirements'] ?? {}),
-      xpReward: json['xpReward'] ?? 0,
-      isCompleted: json['isCompleted'] ?? false,
-      date: DateTime.fromMillisecondsSinceEpoch(
-        json['date'] ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      completedAt: json['completedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'])
-          : null,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    id,
-    title,
-    description,
-    gameType,
-    requirements,
-    xpReward,
-    isCompleted,
-    date,
-    completedAt,
-  ];
 }

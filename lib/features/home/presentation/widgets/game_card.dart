@@ -159,8 +159,13 @@ class GameCard extends StatelessWidget {
         return Icons.quiz_outlined;
       case GameType.ballBlaster:
         return Icons.sports_baseball_outlined;
+
       case GameType.towerBuilding:
         return Icons.apartment_outlined;
+      case GameType.puzzleMania:
+        return Icons.extension;
+      case GameType.droneShooter:
+        return Icons.gamepad_outlined;
     }
   }
 }

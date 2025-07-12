@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gameboo/core/theme/app_theme.dart';
-import 'package:gameboo/features/characters/domain/entities/character.dart';
-import 'package:gameboo/shared/widgets/glass_widgets.dart';
+import '/core/theme/app_theme.dart';
+import '/features/characters/domain/entities/character.dart';
+import '/shared/widgets/glass_widgets.dart';
 
 class CharacterCard extends StatelessWidget {
   final Character character;
@@ -22,10 +22,7 @@ class CharacterCard extends StatelessWidget {
               gradient: AppTheme.primaryGradient,
             ),
             child: ClipOval(
-              child: Image.network(
-                character.imagePath,
-                fit: BoxFit.cover,
-              ),
+              child: Image.network(character.imagePath, fit: BoxFit.cover),
             ),
           ),
           SizedBox(width: 16.w),
