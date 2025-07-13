@@ -71,7 +71,6 @@ class GameBooApp extends StatelessWidget {
             BlocProvider(create: (context) => CharacterCubit()),
             BlocProvider(create: (context) => GameCubit()),
             BlocProvider(create: (context) => ShopCubit()),
-            BlocProvider(create: (context) => ProgressionCubit()),
           ],
           child: BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, state) {

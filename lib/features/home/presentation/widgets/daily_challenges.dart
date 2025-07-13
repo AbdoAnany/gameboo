@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '/features/progression/domain/entities/progression.dart';
@@ -207,4 +208,132 @@ class _ChallengeItem extends StatelessWidget {
         return Icons.star_outline;
     }
   }
+}
+
+class DailyChallenge extends Equatable {
+  final String id;
+  final String title;
+  final String description;
+  final BadgeType? requiredBadge;
+  final int targetScore;
+  final int xpReward;
+  final bool isCompleted;
+  final DateTime expiresAt;
+  final Map<String, dynamic> challengeData;
+
+  const DailyChallenge({
+    required this.id,
+    required this.title,
+    required this.description,
+    this.requiredBadge,
+    required this.targetScore,
+    required this.xpReward,
+    this.isCompleted = false,
+    required this.expiresAt,
+    this.challengeData = const {},
+  });
+
+  DailyChallenge copyWith({
+    String? id,
+    String? title,
+    String? description,
+    BadgeType? requiredBadge,
+    int? targetScore,
+    int? xpReward,
+    bool? isCompleted,
+    DateTime? expiresAt,
+    Map<String, dynamic>? challengeData,
+  }) {
+    return DailyChallenge(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      requiredBadge: requiredBadge ?? this.requiredBadge,
+      targetScore: targetScore ?? this.targetScore,
+      xpReward: xpReward ?? this.xpReward,
+      isCompleted: isCompleted ?? this.isCompleted,
+      expiresAt: expiresAt ?? this.expiresAt,
+      challengeData: challengeData ?? this.challengeData,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'requiredBadge': requiredBadge?.name,
+      'targetScore': targetScore,
+      'xpReward': xpReward,
+      'isCompleted': isCompleted,
+      'expiresAt': expiresAt.millisecondsSinceEpoch,
+      'challengeData': challengeData,
+    };
+  }
+
+  factory DailyChallenge.fromJson(Map<String, dynamic> json) {
+    return DailyChallenge(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      requiredBadge: json['requiredBadge'] != null
+          ? BadgeType.values.firstWhere(
+              (e) => e.name == json['requiredBadge'],
+              orElse: () => BadgeType.firstWin,
+            )
+          : null,
+      targetScore: json['targetScore'] ?? 0,
+      xpReward: json['xpReward'] ?? 0,
+      isCompleted: json['isCompleted'] ?? false,
+      expiresAt: DateTime.fromMillisecondsSinceEpoch(
+        json['expiresAt'] ??
+            DateTime.now().add(Duration(days: 1)).millisecondsSinceEpoch,
+      ),
+      challengeData: Map<String, dynamic>.from(json['challengeData'] ?? {}),
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    title,
+    description,
+    requiredBadge,
+    targetScore,
+    xpReward,
+    isCompleted,
+    expiresAt,
+    challengeData,
+  ];
+}
+enum BadgeType {
+  // Achievement badges
+  firstWin,
+  perfectGame,
+  speedRunner,
+  strategist,
+  unstoppable,
+
+  // Progress badges
+  rookie,
+  veteran,
+  expert,
+  legend,
+
+  // Game-specific badges
+  rockPaperScissorsMaster,
+  ticTacToeChampion,
+  memoryGenius,
+  sharpshooter,
+  racingChampion,
+  pilotAce,
+  quizMaster,
+  ballBlasterPro,
+  towerArchitect,
+
+  // Special badges
+  dailyStreak,
+  weeklyChampion,
+  allRounder,
+  perfectionist,
 }
