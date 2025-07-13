@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../../domain/entities/drone_shooter_entities.dart';
-import '../pages/drone_flight_game/drone_shooter_game_engine.dart';
+import '../../../domain/entities/drone_shooter_entities.dart';
+import 'drone_shooter_game_engine.dart';
 
 class DroneComponent extends RectangleComponent
     with HasGameRef<DroneShooterGame> {

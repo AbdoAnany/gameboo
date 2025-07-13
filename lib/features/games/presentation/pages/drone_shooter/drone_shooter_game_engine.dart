@@ -3,7 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/drone_shooter_components.dart';
+import 'drone_shooter_components.dart';
 import '../../../domain/entities/drone_shooter_entities.dart';
 
 class DroneShooterGame extends FlameGame<World> with HasCollisionDetection {
