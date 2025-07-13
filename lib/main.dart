@@ -23,7 +23,6 @@ import 'features/games/domain/entities/game.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/shop/presentation/cubit/shop_cubit.dart';
 import 'features/shop/presentation/pages/shop_page.dart';
-import 'features/progression/presentation/cubit/progression_cubit.dart';
 import 'firebase_options.dart';
 
 void main() async {
