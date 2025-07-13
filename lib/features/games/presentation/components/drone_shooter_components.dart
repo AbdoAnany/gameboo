@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/drone_shooter_entities.dart';
-import '../pages/drone_shooter_game_engine.dart';
+import '../pages/drone_flight_game/drone_shooter_game_engine.dart';
 
 class DroneComponent extends RectangleComponent
     with HasGameRef<DroneShooterGame> {
@@ -36,148 +36,56 @@ class DroneComponent extends RectangleComponent
       _renderDefenseEffect(canvas);
     }
 
-    // Draw Northrop B-2 Spirit stealth bomber with enhanced details
+    // Futuristic drone: add blue neon outline and cockpit
     final bodyPaint = Paint()
       ..color = Colors.grey.shade900
       ..style = PaintingStyle.fill;
+    final neonPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
 
-    final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.4)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 2);
-
-    // Main body path - authentic B-2 flying wing shape
+    // Main body: stylized diamond/arrow shape
     final path = Path();
-    // Front center point (nose)
-    path.moveTo(size.x / 2, 0);
-
-    // Right wing sweep
-    path.lineTo(size.x * 0.85, size.y * 0.15);
-    path.lineTo(size.x, size.y * 0.5);
-    path.lineTo(size.x * 0.95, size.y * 0.7);
-    path.lineTo(size.x * 0.85, size.y * 0.9);
-
-    // Rear right notch (characteristic B-2 feature)
-    path.lineTo(size.x * 0.7, size.y * 0.85);
-    path.lineTo(size.x * 0.6, size.y * 0.9);
-
-    // Rear center (engines)
-    path.lineTo(size.x * 0.55, size.y);
-    path.lineTo(size.x * 0.45, size.y);
-
-    // Rear left notch
-    path.lineTo(size.x * 0.4, size.y * 0.9);
-    path.lineTo(size.x * 0.3, size.y * 0.85);
-
-    // Left wing sweep (mirror of right)
-    path.lineTo(size.x * 0.15, size.y * 0.9);
-    path.lineTo(size.x * 0.05, size.y * 0.7);
-    path.lineTo(0, size.y * 0.5);
-    path.lineTo(size.x * 0.15, size.y * 0.15);
-
+    path.moveTo(size.x / 2, 0); // Nose
+    path.lineTo(size.x, size.y * 0.4); // Right front
+    path.lineTo(size.x * 0.8, size.y); // Right tail
+    path.lineTo(size.x * 0.2, size.y); // Left tail
+    path.lineTo(0, size.y * 0.4); // Left front
     path.close();
 
-    // Draw shadow first
-    canvas.save();
-    canvas.translate(2, 2);
-    canvas.drawPath(path, shadowPaint);
-    canvas.restore();
-
+    // Draw neon outline
+    canvas.drawPath(path, neonPaint);
     // Draw main body
     canvas.drawPath(path, bodyPaint);
 
-    // Add surface details
-    final detailPaint = Paint()
-      ..color = Colors.grey.shade700
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    // Wing panel lines
-    canvas.drawLine(
-      Offset(size.x * 0.2, size.y * 0.3),
-      Offset(size.x * 0.8, size.y * 0.3),
-      detailPaint,
-    );
-
-    canvas.drawLine(
-      Offset(size.x * 0.25, size.y * 0.6),
-      Offset(size.x * 0.75, size.y * 0.6),
-      detailPaint,
-    );
-
-    // Air intakes
-    final intakePaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-
-    // Left intake
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.x * 0.35, size.y * 0.4),
-        width: 4,
-        height: 2,
-      ),
-      intakePaint,
-    );
-
-    // Right intake
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.x * 0.65, size.y * 0.4),
-        width: 4,
-        height: 2,
-      ),
-      intakePaint,
-    );
-
-    // Cockpit window
+    // Cockpit
     final cockpitPaint = Paint()
-      ..color = Colors.blue.shade900.withOpacity(0.8)
+      ..color = Colors.blueAccent.withOpacity(0.8)
       ..style = PaintingStyle.fill;
-
     canvas.drawOval(
       Rect.fromCenter(
-        center: Offset(size.x / 2, size.y * 0.25),
-        width: 8,
-        height: 4,
+        center: Offset(size.x / 2, size.y * 0.35),
+        width: 12,
+        height: 6,
       ),
       cockpitPaint,
     );
 
-    // Engine exhaust glow when shooting
+    // Engine glow when shooting
     if (_isShooting) {
       final exhaustPaint = Paint()
         ..color = Colors.orange.withOpacity(0.7)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
-      final exhaustCore = Paint()
-        ..color = Colors.yellow.withOpacity(0.9)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
-
-      // Left engine exhaust
-      canvas.drawCircle(Offset(size.x * 0.4, size.y * 0.85), 4, exhaustPaint);
-      canvas.drawCircle(Offset(size.x * 0.4, size.y * 0.85), 2, exhaustCore);
-
-      // Right engine exhaust
-      canvas.drawCircle(Offset(size.x * 0.6, size.y * 0.85), 4, exhaustPaint);
-      canvas.drawCircle(Offset(size.x * 0.6, size.y * 0.85), 2, exhaustCore);
+      canvas.drawCircle(Offset(size.x * 0.5, size.y * 0.95), 5, exhaustPaint);
     }
 
-    // Stealth coating reflection effect
-    final reflectionPaint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    final reflectionPath = Path();
-    reflectionPath.moveTo(size.x * 0.3, size.y * 0.2);
-    reflectionPath.quadraticBezierTo(
-      size.x / 2,
-      size.y * 0.15,
-      size.x * 0.7,
-      size.y * 0.2,
-    );
-
-    canvas.drawPath(reflectionPath, reflectionPaint);
+    // Futuristic lights
+    final lightPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.x * 0.25, size.y * 0.7), 2, lightPaint);
+    canvas.drawCircle(Offset(size.x * 0.75, size.y * 0.7), 2, lightPaint);
   }
 
   void _renderDefenseEffect(Canvas canvas) {
@@ -437,6 +345,7 @@ class EnemyComponent extends RectangleComponent
   final Function(Vector2 position, Vector2 direction, BulletType type)
   onEnemyShoot;
   final Function(EnemyComponent enemy)? onDestroyed;
+  late int health;
 
   EnemyComponent({
     required Vector2 position,
@@ -448,6 +357,7 @@ class EnemyComponent extends RectangleComponent
     if (type != null) {
       enemyData = EnemyData.data[type]!;
     }
+    health = enemyData.health;
   }
 
   @override
@@ -652,8 +562,7 @@ class EnemyComponent extends RectangleComponent
   }
 
   void takeDamage(int damage) {
-    // Create a new enemy data with reduced health
-    final newHealth = (enemyData.health - damage).clamp(0, enemyData.health);
+    health -= damage;
 
     // Visual feedback
     scale = Vector2.all(1.3);
@@ -661,7 +570,9 @@ class EnemyComponent extends RectangleComponent
       scale = Vector2.all(1.0);
     });
 
-    if (newHealth <= 0) {
+    if (health <= 0) {
+      // Call onDestroyed callback so game engine removes from list and triggers effects
+      onDestroyed?.call(this);
       removeFromParent();
     }
   }
