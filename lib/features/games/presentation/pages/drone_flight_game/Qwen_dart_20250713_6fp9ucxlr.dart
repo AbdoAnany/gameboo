@@ -1,21 +1,14 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
+import 'dart:math';
 import 'dart:math' as math;
-import '../../../../../shared/widgets/glass_widgets.dart';
-import '../../../../profile/presentation/cubit/profile_cubit.dart';
-import '../../../../profile/domain/entities/game_activity.dart' as activity;
-import '../../../domain/entities/game.dart';
-
-
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DroneFlightGame extends StatefulWidget {
   final GameDifficulty difficulty;
-
+  
   const DroneFlightGame({Key? key, required this.difficulty}) : super(key: key);
-
+  
   @override
   State<DroneFlightGame> createState() => _DroneFlightGameState();
 }
@@ -23,89 +16,81 @@ class DroneFlightGame extends StatefulWidget {
 class _DroneFlightGameState extends State<DroneFlightGame>
     with TickerProviderStateMixin {
   late Size gameSize;
-
+  
   // Game state
   bool isGameRunning = false;
   bool gameOver = false;
   bool won = false;
-
+  
   // Scoring
   int score = 0;
   int checkpointsCollected = 0;
   int totalCheckpoints = 5;
   late DateTime gameStartTime;
-  late Duration gameTime = Duration(seconds: 30);
-
+  late Duration gameTime;
+  
   // Physics parameters (adjusted for better control)
-  double gravity = 0.0;
+  double gravity = 0.001;
   double maxSpeed = 0.02;
-  double drag = 0.3;
-  double thrustPower=.8;
+  double drag = 0.98;
+  double thrustPower=0;
   // Drone properties
   Offset dronePosition = const Offset(0.1, 0.5);
   double droneVelocityX =0.0;
   double droneVelocityY = 0.0;
   double droneRotation = 0.0;
   bool isThrusting = false;
-
+  
   // Game elements
   List<Obstacle> obstacles = [];
   List<Checkpoint> checkpoints = [];
   List<Particle> particles = [];
-
+  
   // Animation controllers
   late AnimationController _gameController;
-  late AnimationController _thrustAnimationController;
+ late AnimationController _thrustAnimationController;
   late AnimationController _explosionAnimationController;
   late Timer _gameTimer;
-
+  
   // Difficulty settings
   late GameDifficulty selectedDifficulty;
-
+  
   @override
   void initState() {
     super.initState();
     selectedDifficulty = widget.difficulty;
     _configureDifficulty();
-
+    
     _gameController = AnimationController(
       duration: const Duration(milliseconds: 16),
       vsync: this,
     );
-
+    
     _thrustAnimationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
-
+    
     _explosionAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showTutorial();
     });
   }
-  @override
-  void dispose() {
-    _gameTimer.cancel();
-    _gameController.dispose();
-    _thrustAnimationController.dispose();
-    _explosionAnimationController.dispose();
-    super.dispose();
-  }
-
+  
   void _configureDifficulty() {
     switch(selectedDifficulty) {
       case GameDifficulty.easy:
-        gravity = 0.0;
+        gravity = 0.0008;
         thrustPower = 0.012;
         totalCheckpoints = 3;
         break;
       case GameDifficulty.medium:
         gravity = 0.001;
-        thrustPower = 0.1;
+        thrustPower = 0.015;
         totalCheckpoints = 5;
         break;
       case GameDifficulty.hard:
@@ -120,7 +105,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
         break;
     }
   }
-
+  
   void _startGame() {
     setState(() {
       score = 0;
@@ -139,20 +124,20 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       checkpoints.clear();
       particles.clear();
     });
-
+    
     _generateLevel();
     _gameTimer = Timer.periodic(const Duration(milliseconds: 16), _updateGame);
     _gameController.repeat();
   }
-
+  
   void _generateLevel() {
     final rand = math.Random();
-
+    
     // Generate obstacles that move horizontally across the screen
     for (int i = 0; i < 15; i++) {
       final double xPosition = 0.3 + i * 0.5 + rand.nextDouble() * 0.2;
       final double yPosition = rand.nextDouble() * 0.8 + 0.1;
-
+      
       obstacles.add(
         Obstacle(
           position: Offset(xPosition, yPosition),
@@ -165,12 +150,12 @@ class _DroneFlightGameState extends State<DroneFlightGame>
         ),
       );
     }
-
+    
     // Generate checkpoints in a more challenging vertical pattern
     for (int i = 0; i < totalCheckpoints; i++) {
       final double xPosition = 0.5 + i * 1.2;
       final double yPosition = 0.3 + (sin(i * 0.8) + 1) / 4; // Sinusoidal path
-
+      
       checkpoints.add(
         Checkpoint(
           position: Offset(xPosition, yPosition),
@@ -180,36 +165,36 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       );
     }
   }
-
+  
   void _updateGame(Timer timer) {
     if (!isGameRunning || gameOver) return;
-
+    
     setState(() {
       // Apply thrust when active
       if (isThrusting) {
         droneVelocityY -= thrustPower;
       }
-
+      
       // Apply gravity
-      // droneVelocityY += gravity;
-
+      droneVelocityY += gravity;
+      
       // Apply drag
       droneVelocityX *= drag;
       droneVelocityY *= drag;
-
+      
       // Limit speed
       droneVelocityX = droneVelocityX.clamp(-maxSpeed, maxSpeed);
       droneVelocityY = droneVelocityY.clamp(-maxSpeed, maxSpeed);
-
+      
       // Update drone position
       dronePosition = Offset(
         dronePosition.dx + droneVelocityX,
         dronePosition.dy + droneVelocityY,
       );
-
+      
       // Update drone rotation based on velocity
       droneRotation = math.atan2(droneVelocityY, droneVelocityX);
-
+      
       // Update obstacle positions
       for (var obstacle in obstacles) {
         obstacle.position = Offset(
@@ -217,13 +202,13 @@ class _DroneFlightGameState extends State<DroneFlightGame>
           obstacle.position.dy,
         );
       }
-
+      
       // Check boundaries
       if (dronePosition.dy < 0 || dronePosition.dy > 1) {
         _handleGameOver(false);
         return;
       }
-
+      
       // Check obstacle collisions
 
       for (Obstacle obstacle in obstacles) {
@@ -232,62 +217,62 @@ class _DroneFlightGameState extends State<DroneFlightGame>
           return;
         }
       }
-
+      
       // Check checkpoint collection
       for (Checkpoint checkpoint in checkpoints) {
         if (!checkpoint.collected && _checkCollisionWithCheckpoint(checkpoint)) {
           checkpoint.collected = true;
           checkpointsCollected++;
           score += 100;
-
+          
           // Add particle effect
           _addCheckpointParticles(checkpoint.position);
         }
       }
-
+      
       // Update particles
       particles.removeWhere((particle) => particle.life <= 0);
       for (Particle particle in particles) {
         particle.update();
       }
-
+      
       // Add thrust particles
       if (isThrusting) {
         _addThrustParticles();
       }
-
+      
       // Check win condition
       if (checkpointsCollected >= totalCheckpoints) {
         _handleWin();
         return;
       }
-
+      
       // Update score based on distance and time
       score += 1;
       gameTime = DateTime.now().difference(gameStartTime);
     });
   }
-
+  
   void _handleGameOver(bool won) {
     setState(() {
       gameOver = true;
       this.won = won;
       isGameRunning = false;
     });
-
+    
     _addExplosionParticles();
     _explosionAnimationController.forward();
     _gameTimer.cancel();
-
+    
     Future.delayed(const Duration(seconds: 2), () {
       _showGameOverDialog(won);
     });
   }
-
+  
   void _handleWin() {
     _handleGameOver(true);
   }
-
+  
   void _addThrustParticles() {
     final rand = math.Random();
     for (int i = 0; i < 3; i++) {
@@ -308,7 +293,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       );
     }
   }
-
+  
   void _addCheckpointParticles(Offset position) {
     final rand = math.Random();
     for (int i = 0; i < 10; i++) {
@@ -343,7 +328,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       );
     }
   }
-
+  
   bool _checkCollisionWithObstacle(Obstacle obstacle) {
     const droneSize = 0.03; // Smaller drone size for better collision detection
     return (dronePosition.dx < obstacle.position.dx + obstacle.size.width) &&
@@ -351,7 +336,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
         (dronePosition.dy < obstacle.position.dy + obstacle.size.height) &&
         (dronePosition.dy + droneSize > obstacle.position.dy);
   }
-
+  
   bool _checkCollisionWithCheckpoint(Checkpoint checkpoint) {
     const droneSize = 0.03;
     const checkpointSize = 0.05;
@@ -360,7 +345,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
         (dronePosition.dy < checkpoint.position.dy + checkpointSize) &&
         (dronePosition.dy + droneSize > checkpoint.position.dy);
   }
-
+  
   void _showTutorial() {
     showDialog(
       context: context,
@@ -399,7 +384,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       ),
     );
   }
-
+  
   void _showGameOverDialog(bool won) {
     showDialog(
       context: context,
@@ -423,9 +408,9 @@ class _DroneFlightGameState extends State<DroneFlightGame>
             ),
             SizedBox(height: 16.h),
             Text(
-              won
-                  ? 'Excellent flying skills!'
-                  : 'Better luck next time!',
+              won 
+                ? 'Excellent flying skills!' 
+                : 'Better luck next time!',
               style: TextStyle(color: Colors.white),
             ),
             SizedBox(height: 16.h),
@@ -462,7 +447,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
       ),
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -549,7 +534,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
                       ),
                     ),
                   ),
-
+                  
                   // Status indicators
                   Positioned(
                     top: 80.h,
@@ -561,20 +546,20 @@ class _DroneFlightGameState extends State<DroneFlightGame>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _buildStatusIndicator(
-                            context,
-                            'Time',
+                            context, 
+                            'Time', 
                             '${gameTime.inMinutes}:${(gameTime.inSeconds % 60).toString().padLeft(2, '0')}',
                             Colors.blueAccent,
                           ),
                           _buildStatusIndicator(
-                            context,
-                            'Altitude',
+                            context, 
+                            'Altitude', 
                             '${(dronePosition.dy * 100).toInt()}m',
                             Colors.greenAccent,
                           ),
                           _buildStatusIndicator(
-                            context,
-                            'Checkpoints',
+                            context, 
+                            'Checkpoints', 
                             '$checkpointsCollected/$totalCheckpoints',
                             Colors.yellowAccent,
                           ),
@@ -582,7 +567,7 @@ class _DroneFlightGameState extends State<DroneFlightGame>
                       ),
                     ),
                   ),
-
+                  
                   // Game area
                   Positioned(
                     top: 120.h,
@@ -592,20 +577,15 @@ class _DroneFlightGameState extends State<DroneFlightGame>
                     child: GestureDetector(
                       onVerticalDragUpdate: (details) {
                         if (!isGameRunning || gameOver) return;
-print(details.delta.dy );
-print('droneVelocityY $droneVelocityY');
-                        if (details.delta.dy < droneVelocityY) {
-                          // Move up
+                        
+                        if (details.delta.dy < 0) {
                           setState(() {
                             isThrusting = true;
                           });
                           _thrustAnimationController.forward();
-                        } else if (details.delta.dy > droneVelocityY) {
-                          // Move down
+                        } else {
                           setState(() {
                             isThrusting = false;
-                            // Optional: Add logic to increase downward velocity if you want faster descent
-                         droneVelocityY += thrustPower; // Uncomment if needed
                           });
                           _thrustAnimationController.reverse();
                         }
@@ -623,7 +603,6 @@ print('droneVelocityY $droneVelocityY');
                           obstacles: obstacles,
                           checkpoints: checkpoints,
                           particles: particles,
-
                           gameSize: gameSize,
                           gameOver: gameOver,
                           explosionAnimation: _explosionAnimationController.value,
@@ -633,7 +612,7 @@ print('droneVelocityY $droneVelocityY');
                       ),
                     ),
                   ),
-
+                  
                   // Controls instruction
                   Positioned(
                     bottom: 150.h,
@@ -654,7 +633,7 @@ print('droneVelocityY $droneVelocityY');
                       ),
                     ),
                   ),
-
+                  
                   // Game over overlay
                   if (gameOver)
                     Positioned.fill(
@@ -690,7 +669,7 @@ print('droneVelocityY $droneVelocityY');
       ),
     );
   }
-
+  
   Widget _buildStatusIndicator(BuildContext context, String title, String value, Color color) {
     return Container(
       width: 100.w,
@@ -726,7 +705,7 @@ print('droneVelocityY $droneVelocityY');
 
 class DroneGamePainter extends CustomPainter {
   final Offset dronePosition;
-  final double droneRotation;
+ final double droneRotation;
   final List<Obstacle> obstacles;
   final List<Checkpoint> checkpoints;
   final List<Particle> particles;
@@ -734,9 +713,9 @@ class DroneGamePainter extends CustomPainter {
   final bool gameOver;
   final double explosionAnimation;
   final double thrustPower;
-
+  
   DroneGamePainter({
-    required this.dronePosition,
+   required this.dronePosition,
     required this.droneRotation,
     required this.obstacles,
     required this.checkpoints,
@@ -746,27 +725,27 @@ class DroneGamePainter extends CustomPainter {
     required this.explosionAnimation,
     required this.thrustPower,
   });
-
+  
   @override
   void paint(Canvas canvas, Size size) {
     // Draw background clouds
     _drawClouds(canvas, size);
-
+    
     // Draw obstacles
     for (Obstacle obstacle in obstacles) {
       _drawObstacle(canvas, size, obstacle);
     }
-
+    
     // Draw checkpoints
     for (Checkpoint checkpoint in checkpoints) {
       _drawCheckpoint(canvas, size, checkpoint);
     }
-
+    
     // Draw particles
     for (Particle particle in particles) {
       _drawParticle(canvas, size, particle);
     }
-
+    
     // Draw drone
     if (!gameOver) {
       _drawDrone(canvas, size);
@@ -774,12 +753,12 @@ class DroneGamePainter extends CustomPainter {
       _drawExplosion(canvas, size);
     }
   }
-
+  
   void _drawClouds(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.white.withOpacity(0.6)
       ..style = PaintingStyle.fill;
-
+    
     // Simple cloud shapes with parallax effect
     for (int i = 0; i < 5; i++) {
       double x = (i * 0.3 - dronePosition.dx * 0.3) % 1.2;
@@ -787,48 +766,48 @@ class DroneGamePainter extends CustomPainter {
       canvas.drawCircle(Offset(x * size.width, y * size.height), 30, paint);
     }
   }
-
+  
   void _drawObstacle(Canvas canvas, Size size, Obstacle obstacle) {
     final paint = Paint()
       ..color = _getObstacleColor(obstacle.type)
       ..style = PaintingStyle.fill;
-
+    
     final rect = Rect.fromLTWH(
       obstacle.position.dx * size.width,
       obstacle.position.dy * size.height,
       obstacle.size.width * size.width,
       obstacle.size.height * size.height,
     );
-
+    
     canvas.drawRRect(
       RRect.fromRectAndRadius(rect, Radius.circular(size.width * 0.01)),
       paint,
     );
   }
-
+  
   void _drawCheckpoint(Canvas canvas, Size size, Checkpoint checkpoint) {
     if (checkpoint.collected) return;
-
+    
     final center = Offset(
       checkpoint.position.dx * size.width,
       checkpoint.position.dy * size.height,
     );
-
+    
     // Pulsing glow effect
     final double pulseFactor = 0.5 + 0.5 * sin(2 * pi * (DateTime.now().millisecondsSinceEpoch / 1000));
-
+    
     final outerPaint = Paint()
       ..color = Colors.green.withOpacity(0.4 * pulseFactor)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6;
-
+    
     final innerPaint = Paint()
       ..color = Colors.lightGreen.withOpacity(0.6)
       ..style = PaintingStyle.fill;
-
+    
     canvas.drawCircle(center, 25, outerPaint);
     canvas.drawCircle(center, 15, innerPaint);
-
+    
     // Draw rotating check mark
     canvas.save();
     canvas.translate(center.dx, center.dy);
@@ -837,7 +816,7 @@ class DroneGamePainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-
+    
     final path = Path();
     path.moveTo(-5, 0);
     path.lineTo(0, 5);
@@ -845,12 +824,12 @@ class DroneGamePainter extends CustomPainter {
     canvas.drawPath(path, checkPaint);
     canvas.restore();
   }
-
+  
   void _drawParticle(Canvas canvas, Size size, Particle particle) {
     final paint = Paint()
       ..color = particle.color.withOpacity(particle.life / particle.maxLife)
       ..style = PaintingStyle.fill;
-
+    
     canvas.drawCircle(
       Offset(
         particle.position.dx * size.width,
@@ -860,34 +839,34 @@ class DroneGamePainter extends CustomPainter {
       paint,
     );
   }
-
+  
   void _drawDrone(Canvas canvas, Size size) {
     final center = Offset(
       dronePosition.dx * size.width,
       dronePosition.dy * size.height,
     );
-
+    
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(droneRotation);
-
+    
     // Draw engine exhaust trails
     _drawEngineExhaust(canvas, size);
-
+    
     // Draw main body
     _drawDroneBody(canvas, size);
-
+    
     // Draw propellers
     _drawPropellers(canvas);
-
+    
     canvas.restore();
   }
-
+  
   void _drawEngineExhaust(Canvas canvas, Size size) {
     final exhaustPaint = Paint()
       ..color = Colors.orange.withOpacity(0.6 * thrustPower)
       ..style = PaintingStyle.fill;
-
+    
     final exhaustGradient = RadialGradient(
       colors: [
         Colors.orange.withOpacity(0.8 * thrustPower),
@@ -896,13 +875,13 @@ class DroneGamePainter extends CustomPainter {
       ],
       stops: const [0.0, 0.5, 1.0],
     );
-
+    
     // Engine positions (underneath the drone)
     final enginePositions = [
       const Offset(-10, 15),
       const Offset(10, 15),
     ];
-
+    
     for (final pos in enginePositions) {
       final exhaustRect = Rect.fromCenter(
         center: pos,
@@ -913,17 +892,17 @@ class DroneGamePainter extends CustomPainter {
       canvas.drawOval(exhaustRect, exhaustPaint);
     }
   }
-
+  
   void _drawDroneBody(Canvas canvas, Size size) {
     // Main body (smaller and more aerodynamic)
     final bodyPaint = Paint()
       ..color = const Color(0xFF34495E)
       ..style = PaintingStyle.fill;
-
+    
     final shadowPaint = Paint()
       ..color = Colors.black.withOpacity(0.3)
       ..style = PaintingStyle.fill;
-
+    
     // Shadow
     canvas.save();
     canvas.translate(2, 2);
@@ -937,7 +916,7 @@ class DroneGamePainter extends CustomPainter {
     ));
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
-
+    
     // Main body
     final bodyPath = Path();
     bodyPath.addRRect(RRect.fromRectAndCorners(
@@ -948,40 +927,40 @@ class DroneGamePainter extends CustomPainter {
       bottomRight: Radius.circular(8),
     ));
     canvas.drawPath(bodyPath, bodyPaint);
-
+    
     // Cockpit window
     final cockpitPaint = Paint()
       ..color = Colors.white.withOpacity(0.3)
       ..style = PaintingStyle.fill;
-
+    
     canvas.drawRect(
       Rect.fromCenter(center: Offset.zero, width: 18, height: 12),
       cockpitPaint,
     );
   }
-
+  
   void _drawPropellers(Canvas canvas) {
     final bladePaint = Paint()
       ..color = Colors.white.withOpacity(0.8)
       ..style = PaintingStyle.fill;
-
+    
     // Propeller positions
     final propellerPositions = [
       const Offset(-15, -10),
       const Offset(15, -10),
     ];
-
+    
     final now = DateTime.now().millisecondsSinceEpoch;
     final rotationAngle = (now % 1000) / 1000 * 2 * pi;
-
+    
     for (final pos in propellerPositions) {
       canvas.save();
       canvas.translate(pos.dx, pos.dy);
       canvas.rotate(rotationAngle);
-
+      
       // Draw propeller hub
       canvas.drawCircle(Offset.zero, 3, bladePaint);
-
+      
       // Draw blades
       for (int i = 0; i < 2; i++) {
         canvas.rotate(pi);
@@ -990,21 +969,21 @@ class DroneGamePainter extends CustomPainter {
           bladePaint,
         );
       }
-
+      
       canvas.restore();
     }
   }
-
+  
   void _drawExplosion(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.orange.withOpacity(1 - explosionAnimation)
       ..style = PaintingStyle.fill;
-
+    
     final center = Offset(
       dronePosition.dx * size.width,
       dronePosition.dy * size.height,
     );
-
+    
     // Multiple explosion rings
     for (int i = 0; i < 3; i++) {
       final radius = (20 + i * 15) * (1 + explosionAnimation);
@@ -1013,7 +992,7 @@ class DroneGamePainter extends CustomPainter {
           .withOpacity(max(0.0, opacity));
       canvas.drawCircle(center, radius, paint);
     }
-
+    
     // Debris particles
     for (int i = 0; i < 8; i++) {
       final angle = (i * pi / 4) + explosionAnimation * pi;
@@ -1026,7 +1005,7 @@ class DroneGamePainter extends CustomPainter {
       canvas.drawCircle(debrisPos, 3, paint);
     }
   }
-
+  
   Color _getObstacleColor(ObstacleType type) {
     switch (type) {
       case ObstacleType.building:
@@ -1037,18 +1016,18 @@ class DroneGamePainter extends CustomPainter {
         return Colors.red.shade400;
     }
   }
-
+  
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 // Existing classes remain unchanged
 class Obstacle {
-   Offset position;
+  late final Offset position;
   final Size size;
   final ObstacleType type;
   final double horizontalSpeed;
-
+  
   Obstacle({
     required this.position,
     required this.size,
@@ -1061,7 +1040,7 @@ class Checkpoint {
   final Offset position;
   bool collected;
   final int id;
-
+  
   Checkpoint({
     required this.position,
     required this.collected,
@@ -1092,3 +1071,4 @@ class Particle {
 
 enum ObstacleType { building, mountain, tower }
 
+enum GameDifficulty { easy, medium, hard, expert }
